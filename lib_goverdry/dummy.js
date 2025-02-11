@@ -42,3 +42,7 @@ class DummyNavigator {
   load () {}
 }
 navigator = new DummyNavigator()
+
+function printDebugMessage (a) {
+  console.log(a)
+}

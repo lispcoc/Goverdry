@@ -98,10 +98,10 @@ var use_timestamp = false
 func main() {
 	// Create a new runtime
 	rt := quickjs.NewRuntime(
-		quickjs.WithExecuteTimeout(30),
+		quickjs.WithExecuteTimeout(3000),
 		quickjs.WithMemoryLimit(128*1024*1024),
-		quickjs.WithGCThreshold(256*1024),
-		quickjs.WithMaxStackSize(65534),
+		quickjs.WithGCThreshold(128*1024*1024),
+		quickjs.WithMaxStackSize(65534*1024),
 		quickjs.WithCanBlock(true),
 	)
 	defer rt.Close()
@@ -125,6 +125,8 @@ func main() {
 		fmt.Println(ret.Get("stack").String())
 	}
 
+	initConsole(ctx)
+
 	files, _ = os.ReadDir("lib_goverdry")
 	for _, f := range files {
 		fmt.Println(f.Name())
@@ -135,7 +137,6 @@ func main() {
 		fmt.Println(ret.Get("stack").String())
 	}
 
-	initConsole(ctx)
 	initDocument(ctx)
 	initWindow(ctx)
 	initAnimation(ctx)
@@ -185,23 +186,33 @@ func main() {
 				f = currentFunc + "(" + strconv.FormatInt(elapsed.Milliseconds(), 10) + ")"
 			}
 			println(f)
-			_, err := ctx.Eval(f)
+			_, err := ctx.Eval("try { " + f + " } catch (error) {console.log(error); console.log(error.stack)}")
 			if err != nil {
 				println(err.Error())
 				break
 			}
 			s = time.Now()
 		}
+		ctx.Loop()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch event.(type) {
+			println("PollEvent")
+			switch t := event.(type) {
+			case *sdl.JoyButtonEvent:
+				if t.Button == 1 {
+					running = false
+				}
+			case *sdl.KeyboardEvent:
+				if t.Keysym.Sym == sdl.K_q {
+					running = false
+				}
 			case *sdl.QuitEvent: // NOTE: Please use `*sdl.QuitEvent` for `v0.4.x` (current version).
 				println("Quit")
 				running = false
-				break
 			}
 		}
-
 		sdl.Delay(33)
 	}
+	ctx.Close()
+	rt.Close()
 }

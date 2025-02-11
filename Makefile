@@ -4,8 +4,8 @@
 
 SRCS := $(wildcard ./*.go)
 
-run: 
+run: $(SRCS)
 	go run $(SRCS)
 
-build:
+build: $(SRCS)
 	go build $(SRCS)
