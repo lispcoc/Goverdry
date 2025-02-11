@@ -201,10 +201,25 @@ func main() {
 	ctx := rt.NewContext()
 	defer ctx.Close()
 
+	_, err := ctx.EvalFile("test_data/gameDataHTML5.js")
+	if err != nil {
+		println(err.Error())
+	}
+
 	files, _ := os.ReadDir("lib")
 	for _, f := range files {
 		fmt.Println(f.Name())
 		ret, err := ctx.EvalFile("lib/" + f.Name())
+		if err != nil {
+			println(err.Error())
+		}
+		fmt.Println(ret.Get("stack").String())
+	}
+
+	files, _ = os.ReadDir("lib_goverdry")
+	for _, f := range files {
+		fmt.Println(f.Name())
+		ret, err := ctx.EvalFile("lib_goverdry/" + f.Name())
 		if err != nil {
 			println(err.Error())
 		}
@@ -244,7 +259,8 @@ func main() {
 	}
 	ctx.Loop()
 
-	_, err := ctx.Eval("window.onload()")
+	// Window Events
+	_, err = ctx.Eval("window.onload()")
 	if err != nil {
 		println(err.Error())
 	}
