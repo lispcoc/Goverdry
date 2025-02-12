@@ -23,17 +23,12 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 		y2 := ret.Get("end_y").Int32()
 		SDL_Renderer.DrawLine(x1, y1, x2, y2)
 	}
-	SDL_Renderer.Present()
 
 	return ctx.String("")
 }
 
 func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	// DrawLine(this.lines_ready, red, green, blue)
-	println(uint8(args[1].Uint32()))
-	println(uint8(args[2].Uint32()))
-	println(uint8(args[3].Uint32()))
-
 	SDL_Renderer.SetDrawColor(uint8(args[1].Uint32()), uint8(args[2].Uint32()), uint8(args[3].Uint32()), 255)
 
 	color := sdl.Color{uint8(args[1].Uint32()), uint8(args[2].Uint32()), uint8(args[3].Uint32()), 255}
@@ -47,7 +42,6 @@ func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	v := []sdl.Vertex{vt[0], vt[1], vt[2]}
 
 	SDL_Renderer.RenderGeometry(nil, v, nil)
-	SDL_Renderer.Present()
 
 	return ctx.String("")
 }
@@ -69,8 +63,6 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	pasteRect := sdl.Rect{x, y, width, height}
 	SDL_Renderer.Copy(texture, &txtRect, &pasteRect)
 
-	SDL_Renderer.Present()
-
 	return ctx.String("")
 }
 
@@ -87,27 +79,32 @@ func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	surface, _ := SDL_Window.GetSurface()
 
 	rect := sdl.Rect{x, y, x + w, y + h}
-	colour := sdl.Color{R: red, G: green, B: blue, A: 255} // purple
+	colour := sdl.Color{R: red, G: green, B: blue, A: 255}
 	pixel := sdl.MapRGBA(surface.Format, colour.R, colour.G, colour.B, colour.A)
 	surface.FillRect(&rect, pixel)
 
 	texture, _ := SDL_Renderer.CreateTextureFromSurface(surface)
 	SDL_Renderer.Copy(texture, &rect, &rect)
 
-	SDL_Renderer.Present()
-
 	return ctx.String("")
 }
 
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	//sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 800, 600, sdl.WINDOW_SHOWN)
-	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, args[0].Int32(), args[1].Int32(), sdl.WINDOW_SHOWN)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, sdl.GL_CONTEXT_PROFILE_ES);
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, 2);
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 0);
+	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1);
+
+	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, args[0].Int32(), args[1].Int32(), sdl.WINDOW_OPENGL | sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
+	window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+	sdl.GLSetSwapInterval(1)
 	SDL_Window = window
 
-	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
 	if err != nil {
 		panic(err)
 	}
@@ -159,6 +156,10 @@ func Mix_PlayChannel(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Va
 		return ctx.Bool(false)
 	}
 	return ctx.Bool(true)
+}
+
+func updateWindow() {
+	SDL_Renderer.Present()
 }
 
 func iniSDL(ctx *quickjs.Context) {

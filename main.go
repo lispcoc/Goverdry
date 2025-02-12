@@ -170,7 +170,7 @@ func main() {
 	ctx.Loop()
 
 	// Window Events
-	_, err = ctx.Eval("window.onload()")
+	_, err = ctx.Eval("try { window.onload() } catch (error) {console.log(error); console.log(error.stack)}")
 	if err != nil {
 		println(err.Error())
 	}
@@ -195,6 +195,7 @@ func main() {
 		}
 		ctx.Loop()
 
+		updateWindow()
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			println("PollEvent")
 			switch t := event.(type) {

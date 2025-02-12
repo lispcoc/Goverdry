@@ -9,6 +9,7 @@ class Game {
   }
 
   start () {
+    console.log([this.constructor.name, 'start'].join('.'))
     SDL.CreateWindow(this.width, this.height)
   }
 }
