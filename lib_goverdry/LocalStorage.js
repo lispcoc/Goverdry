@@ -1,13 +1,16 @@
 class LocalStorage {
-  getItem (a) {
-    console.log([this.constructor.name, 'getItem', a].join('.'))
-    return null
+  getItem (dataName) {
+    console.log([this.constructor.name, 'getItem', dataName].join('.'))
+    var dataStr = IO.readTextFile("./save/" + dataName)
+    return dataStr
   }
-  setItem (a) {
-    console.log([this.constructor.name, 'setItem', a].join('.'))
+  setItem (dataName, dataStr) {
+    console.log([this.constructor.name, 'setItem', dataName, dataStr].join('.'))
+    IO.writeTextFile("./save/" + dataName, dataStr)
   }
-  removeItem (a) {
-    console.log([this.constructor.name, 'removeItem', a].join('.'))
+  removeItem (dataName) {
+    console.log([this.constructor.name, 'removeItem', dataName].join('.'))
+    IO.writeTextFile("./save/" + dataName, "")
   }
 }
 

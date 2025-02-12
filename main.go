@@ -4,6 +4,7 @@ import "C"
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"slices"
@@ -27,6 +28,31 @@ func initConsole(ctx *quickjs.Context) {
 		return ctx.String(line)
 	}))
 	ctx.Globals().Set("console", console)
+}
+
+func initIO(ctx *quickjs.Context) {
+	console := ctx.Object()
+	console.Set("readTextFile", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+		f, err := os.Open(args[0].String())
+		if err != nil {
+			ctx.Null()
+		}
+		bytes, err := io.ReadAll(f)
+		if err != nil {
+			ctx.Null()
+		}
+		return ctx.String(string(bytes))
+	}))
+	console.Set("writeTextFile", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+		f, err := os.Create(args[0].String())
+		if err != nil {
+			ctx.Null()
+		}
+		f.WriteString(args[1].String())
+		f.Sync()
+		return ctx.Null()
+	}))
+	ctx.Globals().Set("IO", console)
 }
 
 func initDocument(ctx *quickjs.Context) {
@@ -148,6 +174,7 @@ func main() {
 	initDocument(ctx)
 	initWindow(ctx)
 	initAnimation(ctx)
+	initIO(ctx)
 	if headless {
 		iniDummySDL(ctx)
 	} else {
