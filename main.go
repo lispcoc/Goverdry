@@ -214,16 +214,6 @@ func main() {
 			break
 		}
 
-		println(ctx.Globals().Get("MONSTER_TYPE").String())
-		if ctx.Globals().Get("MONSTER_TYPE").String() == "stopStart" {
-			_, err := ctx.Eval("try { eventTouchstart({ target : { id : 'game_window' } }) } catch (error) {console.log(error); console.log(error.stack)}")
-			if err != nil {
-				println(err.Error())
-				break
-			}
-			
-		}
-
 		updateWindow()
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			println("PollEvent")
@@ -241,7 +231,7 @@ func main() {
 				running = false
 			}
 		}
-		sdl.Delay(33)
+		sdl.Delay(200)
 	}
 	ctx.Close()
 	rt.Close()

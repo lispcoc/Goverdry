@@ -10,8 +10,12 @@ import (
 var SDL_Font *ttf.Font
 var SDL_Renderer *sdl.Renderer
 var SDL_Window *sdl.Window
+var window_ok = false
 
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 
@@ -31,6 +35,9 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 }
 
 func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 
@@ -53,6 +60,9 @@ func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 }
 
 func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 	text := args[1].String()
@@ -72,6 +82,9 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 }
 
 func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 	x := args[1].Int32()
@@ -90,6 +103,9 @@ func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 }
 
 func SDL_LayerClear(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 	rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
@@ -124,6 +140,8 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 		panic(err)
 	}
 	surface.FillRect(nil, 0)
+
+	window_ok = true
 
 	ttf.Init()
 	SDL_Font, err = ttf.OpenFont("HackGen35Console-Bold.ttf", 14)
@@ -192,6 +210,10 @@ func Mix_PlayChannel(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Va
 }
 
 func updateWindow() {
+	if !window_ok {
+		println("window not ready.")
+		return
+	}
 	SDL_Renderer.SetRenderTarget(nil)
 
 	surface, _ := SDL_Window.GetSurface()

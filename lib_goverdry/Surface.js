@@ -135,4 +135,8 @@ class SurfaceContext {
     var color = toRGB(this.fillStyle)
     SDL.FillText(this.handle ,Text, x, y, color.r, color.g, color.b)
   }
+  drawImage(img, x, y) {
+    console.log([this.constructor.name, 'drawImage', img, x, y].join('.'))
+    console.log("[Todo]drawImage is not implemented.")
+  }
 }
