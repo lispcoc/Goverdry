@@ -162,6 +162,26 @@ func updateWindow() {
 	SDL_Renderer.Present()
 }
 
+func DummyFunction(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	return ctx.Int32(0)
+}
+
+func iniDummySDL(ctx *quickjs.Context) {
+	SDL := ctx.Object()
+	ctx.Globals().Set("SDL", SDL)
+	SDL.Set("CreateWindow", ctx.Function(DummyFunction))
+	SDL.Set("DrawLine", ctx.Function(DummyFunction))
+	SDL.Set("FillText", ctx.Function(DummyFunction))
+	SDL.Set("FillRect", ctx.Function(DummyFunction))
+	SDL.Set("Triangle", ctx.Function(DummyFunction))
+
+	MIX := ctx.Object()
+	ctx.Globals().Set("MIX", MIX)
+	MIX.Set("LoadWAV", ctx.Function(DummyFunction))
+	MIX.Set("LoadMUS", ctx.Function(DummyFunction))
+	MIX.Set("PlayChannel", ctx.Function(DummyFunction))
+}
+
 func iniSDL(ctx *quickjs.Context) {
 	//
 	// Window

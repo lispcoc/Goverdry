@@ -82,19 +82,19 @@ class SurfaceContext {
     const start_y = this.points_ready[0].y
 
     for (var i = 1; i < this.points_ready.length - 1; i++) {
-      var tri = [{x: start_x, y: start_y}]
-      tri.push({x: this.points_ready[i].x, y: this.points_ready[i].y})
-      tri.push({x: this.points_ready[i + 1].x, y: this.points_ready[i + 1].y})
+      var tri = [{ x: start_x, y: start_y }]
+      tri.push({ x: this.points_ready[i].x, y: this.points_ready[i].y })
+      tri.push({ x: this.points_ready[i + 1].x, y: this.points_ready[i + 1].y })
       SDL.Triangle(tri, color.r, color.g, color.b)
     }
   }
   stroke () {
     console.log([this.constructor.name, 'stroke'].join('.'))
-    if(this.points_ready.length == 0) {
-      this.closePath ()
+    if (this.points_ready.length == 0) {
+      this.closePath()
     }
-    if(this.points_ready.length == 0) {
-      console.log("Error: no points to draw.")
+    if (this.points_ready.length == 0) {
+      console.log('Error: no points to draw.')
       return
     }
     var color = toRGB(this.strokeStyle)
@@ -124,5 +124,9 @@ class SurfaceContext {
     console.log([this.constructor.name, 'fillText', Text, x, y].join('.'))
     var color = toRGB(this.fillStyle)
     SDL.FillText(Text, x, y, color.r, color.g, color.b)
+  }
+  drawImage (img, x, y) {
+    console.log([this.constructor.name, 'drawImage', img, x, y].join('.'))
+    console.log('[WIP]drawImage to be implemented.')
   }
 }

@@ -96,6 +96,14 @@ var currentFunc = ""
 var use_timestamp = false
 
 func main() {
+	headless := false
+	for _, v := range os.Args {
+		if v == "--headless" {
+			fmt.Printf("Run in headless mode.")
+			headless = true
+		}
+	}
+
 	// Create a new runtime
 	rt := quickjs.NewRuntime(
 		quickjs.WithExecuteTimeout(3000),
@@ -140,7 +148,11 @@ func main() {
 	initDocument(ctx)
 	initWindow(ctx)
 	initAnimation(ctx)
-	iniSDL(ctx)
+	if headless {
+		iniDummySDL(ctx)
+	} else {
+		iniSDL(ctx)
+	}
 
 	pre_files := []string{"SpellEffect.min.js"}
 	for _, f := range pre_files {
@@ -194,6 +206,23 @@ func main() {
 			s = time.Now()
 		}
 		ctx.Loop()
+
+		// load image
+		_, err := ctx.Eval("try { loadImage() } catch (error) {console.log(error); console.log(error.stack)}")
+		if err != nil {
+			println(err.Error())
+			break
+		}
+
+		println(ctx.Globals().Get("MONSTER_TYPE").String())
+		if ctx.Globals().Get("MONSTER_TYPE").String() == "stopStart" {
+			_, err := ctx.Eval("try { eventTouchstart({ target : { id : 'game_window' } }) } catch (error) {console.log(error); console.log(error.stack)}")
+			if err != nil {
+				println(err.Error())
+				break
+			}
+			
+		}
 
 		updateWindow()
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
