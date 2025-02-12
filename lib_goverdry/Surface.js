@@ -3,6 +3,15 @@ function toRGB (s) {
   if (s == undefined || s == null) {
     return { r: 255, g: 255, b: 255 }
   }
+  if (s == 'red') {
+    s = '#ff0000'
+  }
+  if (s == 'green') {
+    s = '#00ff00'
+  }
+  if (s == 'blue') {
+    s = '#0000ff'
+  }
   if (s == 'pink') {
     s = '#ffc0cb'
   }
@@ -34,10 +43,11 @@ class Surface extends SceneNode {
     this.WINDOW_HEIGHT = WINDOW_HEIGHT
     this.fillStyle = '#ffffff'
     this.context = new SurfaceContext()
+
+    this.handle = SDL.CreateRGBSurface(this.WINDOW_WIDTH, this.WINDOW_HEIGHT)
   }
   clear () {
-    this.context.fillStyle = '#ffffff'
-    this.context.fillRect(0, 0, GameBody.width, GameBody.height)
+    SDL.LayerClear(this.handle)
   }
 }
 
@@ -82,19 +92,19 @@ class SurfaceContext {
     const start_y = this.points_ready[0].y
 
     for (var i = 1; i < this.points_ready.length - 1; i++) {
-      var tri = [{ x: start_x, y: start_y }]
-      tri.push({ x: this.points_ready[i].x, y: this.points_ready[i].y })
-      tri.push({ x: this.points_ready[i + 1].x, y: this.points_ready[i + 1].y })
-      SDL.Triangle(tri, color.r, color.g, color.b)
+      var tri = [{x: start_x, y: start_y}]
+      tri.push({x: this.points_ready[i].x, y: this.points_ready[i].y})
+      tri.push({x: this.points_ready[i + 1].x, y: this.points_ready[i + 1].y})
+      SDL.Triangle(this.handle ,tri, color.r, color.g, color.b)
     }
   }
   stroke () {
     console.log([this.constructor.name, 'stroke'].join('.'))
-    if (this.points_ready.length == 0) {
-      this.closePath()
+    if(this.points_ready.length == 0) {
+      this.closePath ()
     }
-    if (this.points_ready.length == 0) {
-      console.log('Error: no points to draw.')
+    if(this.points_ready.length == 0) {
+      console.log("Error: no points to draw.")
       return
     }
     var color = toRGB(this.strokeStyle)
@@ -113,20 +123,16 @@ class SurfaceContext {
         current_y = a.y
       }
     }
-    SDL.DrawLine(lines, color.r, color.g, color.b)
+    SDL.DrawLine(this.handle ,lines, color.r, color.g, color.b)
   }
   fillRect (x, y, w, h) {
     console.log([this.constructor.name, 'fillRect'].join('.'))
     var color = toRGB(this.fillStyle)
-    SDL.FillRect(x, y, w, h, color.r, color.g, color.b)
+    SDL.FillRect(this.handle ,x, y, w, h, color.r, color.g, color.b)
   }
   fillText (Text, x, y) {
     console.log([this.constructor.name, 'fillText', Text, x, y].join('.'))
     var color = toRGB(this.fillStyle)
-    SDL.FillText(Text, x, y, color.r, color.g, color.b)
-  }
-  drawImage (img, x, y) {
-    console.log([this.constructor.name, 'drawImage', img, x, y].join('.'))
-    console.log('[WIP]drawImage to be implemented.')
+    SDL.FillText(this.handle ,Text, x, y, color.r, color.g, color.b)
   }
 }
