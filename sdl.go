@@ -86,7 +86,7 @@ func SDL_FilledPolygonColor(ctx *quickjs.Context, this quickjs.Value, args []qui
 
 func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	if !window_ok {
-		return ctx.String("")
+		return ctx.Null()
 	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
@@ -106,7 +106,7 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	txt.Destroy()
 	surface.Free()
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -174,12 +174,10 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 		println(err.Error())
 		panic(err)
 	}
-	//window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
 	sdl.GLSetSwapInterval(1)
 	SDL_Window = window
 
 	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
-	//SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		println(err.Error())
 		panic(err)
