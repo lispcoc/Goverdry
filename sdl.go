@@ -21,7 +21,6 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	layer := LayerList[handle]
 
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.SetDrawColor(uint8(args[2].Uint32()), uint8(args[3].Uint32()), uint8(args[4].Uint32()), 255)
 
 	for i := 0; i < int(args[1].ToArray().Len()); i++ {
 		ret, _ := args[1].ToArray().Get(int64(i))
@@ -29,8 +28,8 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 		y1 := ret.Get("start_y").Int32()
 		x2 := ret.Get("end_x").Int32()
 		y2 := ret.Get("end_y").Int32()
-		gfx.ThickLineColor(SDL_Renderer, x1, y1, x2, y2, 2, sdl.Color{uint8(args[2].Uint32()), uint8(args[3].Uint32()), uint8(args[4].Uint32()), 255})
-		//SDL_Renderer.DrawLine(x1, y1, x2, y2)
+		color := sdl.Color{R: uint8(args[2].Uint32()), G: uint8(args[3].Uint32()), B: uint8(args[4].Uint32()), A: 255}
+		gfx.ThickLineColor(SDL_Renderer, x1, y1, x2, y2, 2, color)
 	}
 
 	return ctx.String("")
@@ -44,15 +43,14 @@ func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	layer := LayerList[handle]
 
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.SetDrawColor(uint8(args[2].Uint32()), uint8(args[3].Uint32()), uint8(args[4].Uint32()), 255)
 
-	color := sdl.Color{uint8(args[2].Uint32()), uint8(args[3].Uint32()), uint8(args[4].Uint32()), 255}
+	color := sdl.Color{R: uint8(args[2].Uint32()), G: uint8(args[3].Uint32()), B: uint8(args[4].Uint32()), A: 255}
 	var vt [3]sdl.Vertex
 	for i := 0; i < 3; i++ {
 		ret, _ := args[1].ToArray().Get(int64(i))
 		x := float32(ret.Get("x").Float64())
 		y := float32(ret.Get("y").Float64())
-		vt[i] = sdl.Vertex{sdl.FPoint{x, y}, color, sdl.FPoint{1, 1}}
+		vt[i] = sdl.Vertex{Position: sdl.FPoint{X: x, Y: y}, Color: color, TexCoord: sdl.FPoint{X: 1, Y: 1}}
 	}
 	v := []sdl.Vertex{vt[0], vt[1], vt[2]}
 
@@ -78,7 +76,7 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	txt, _ := SDL_Renderer.CreateTextureFromSurface(surface)
 	_, _, w, h, _ := txt.Query()
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.Copy(txt, &sdl.Rect{0, 0, w, h}, &sdl.Rect{x, y, w, h})
+	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y, W: w, H: h})
 
 	txt.Destroy()
 	surface.Free()
@@ -99,7 +97,7 @@ func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	red := uint8(args[5].Int32())
 	green := uint8(args[6].Int32())
 	blue := uint8(args[7].Int32())
-	rect := sdl.Rect{x, y, x + w, y + h}
+	rect := sdl.Rect{X: x, Y: y, W: x + w, H: y + h}
 	SDL_Renderer.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	SDL_Renderer.SetDrawColor(red, green, blue, 255)
 	SDL_Renderer.SetRenderTarget(layer.texture)
@@ -114,7 +112,7 @@ func SDL_LayerClear(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Val
 	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
-	rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
+	rect := sdl.Rect{X: layer.x, Y: layer.y, W: layer.w, H: layer.h}
 	SDL_Renderer.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
 	SDL_Renderer.SetRenderTarget(layer.texture)
@@ -130,8 +128,8 @@ func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []qui
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 	surface, _ := SDL_Window.GetSurface()
-	dst_rect := sdl.Rect{0, 0, surface.W, surface.H}
-	src_rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
+	dst_rect := sdl.Rect{X: 0, Y: 0, W: surface.W, H: surface.H}
+	src_rect := sdl.Rect{X: layer.x, Y: layer.y, W: layer.w, H: layer.h}
 
 	if handle > 1 {
 		return ctx.String("")
@@ -201,7 +199,7 @@ func SDL_CreateRGBSurface(ctx *quickjs.Context, this quickjs.Value, args []quick
 	t, _ := SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, w, h)
 	t.SetBlendMode(sdl.BLENDMODE_BLEND)
 	layer := Layer{t, 0, 0, w, h}
-	rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
+	rect := sdl.Rect{X: layer.x, Y: layer.y, W: layer.w, H: layer.h}
 	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
 	SDL_Renderer.SetRenderTarget(layer.texture)
 	SDL_Renderer.FillRect(&rect)
@@ -247,7 +245,7 @@ func resetWindow() {
 	t, _ := SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, surface.W, surface.H)
 	t.SetBlendMode(sdl.BLENDMODE_NONE)
 
-	rect := sdl.Rect{0, 0, surface.W, surface.H}
+	rect := sdl.Rect{X: 0, Y: 0, W: surface.W, H: surface.H}
 	SDL_Renderer.SetRenderTarget(nil)
 	if err := SDL_Renderer.Copy(t, &rect, &rect); err != nil {
 		panic(err)
