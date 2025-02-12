@@ -221,6 +221,7 @@ func main() {
 			println(err.Error())
 			break
 		}
+		applyWindow()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			println("PollEvent")

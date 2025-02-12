@@ -80,6 +80,9 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	SDL_Renderer.SetRenderTarget(layer.texture)
 	SDL_Renderer.Copy(txt, &sdl.Rect{0, 0, w, h}, &sdl.Rect{x, y, w, h})
 
+	txt.Destroy()
+	surface.Free()
+
 	return ctx.String("")
 }
 
@@ -138,8 +141,6 @@ func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []qui
 		panic(err)
 	}
 
-	SDL_Renderer.Present()
-
 	return ctx.String("")
 }
 
@@ -148,23 +149,26 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 0)
 	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
-	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
 
 	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, args[0].Int32(), args[1].Int32(), sdl.WINDOW_OPENGL|sdl.WINDOW_SHOWN)
 	if err != nil {
+		println(err.Error())
 		panic(err)
 	}
-	//window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+	window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
 	sdl.GLSetSwapInterval(1)
 	SDL_Window = window
 
-	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
+	//SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
+		println(err.Error())
 		panic(err)
 	}
 
 	surface, err := window.GetSurface()
 	if err != nil {
+		println(err.Error())
 		panic(err)
 	}
 	surface.FillRect(nil, 0)
@@ -174,6 +178,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	ttf.Init()
 	SDL_Font, err = ttf.OpenFont("HackGen35Console-Bold.ttf", 14)
 	if err != nil {
+		println(err.Error())
 		panic(err)
 	}
 
@@ -247,6 +252,12 @@ func resetWindow() {
 	if err := SDL_Renderer.Copy(t, &rect, &rect); err != nil {
 		panic(err)
 	}
+	t.Destroy()
+}
+
+func applyWindow() {
+	SDL_Renderer.SetRenderTarget(nil)
+	SDL_Renderer.Present()
 }
 
 func DummyFunction(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {

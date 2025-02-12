@@ -8,4 +8,4 @@ run: $(SRCS)
 	go run $(SRCS)
 
 build: $(SRCS)
-	go build $(SRCS)
+	go build -o Goverdry $(SRCS)
