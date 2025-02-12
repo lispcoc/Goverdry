@@ -59,6 +59,31 @@ func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	return ctx.String("")
 }
 
+func SDL_FilledPolygonColor(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
+	handle := args[0].Int32()
+	layer := LayerList[handle]
+
+	SDL_Renderer.SetRenderTarget(layer.texture)
+
+	var vx []int16
+	var vy []int16
+	for i := 0; i < int(args[1].ToArray().Len()); i++ {
+		v, _ := args[1].ToArray().Get(int64(i))
+		vx = append(vx, int16(v.Int32()))
+	}
+	for i := 0; i < int(args[2].ToArray().Len()); i++ {
+		v, _ := args[2].ToArray().Get(int64(i))
+		vy = append(vy, int16(v.Int32()))
+	}
+	color := sdl.Color{R: uint8(args[3].Uint32()), G: uint8(args[4].Uint32()), B: uint8(args[5].Uint32()), A: 255}
+	gfx.FilledPolygonColor(SDL_Renderer, vx, vy, color)
+
+	return ctx.String("")
+}
+
 func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	if !window_ok {
 		return ctx.String("")
@@ -112,18 +137,17 @@ func SDL_LayerClear(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Val
 	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
-	rect := sdl.Rect{X: layer.x, Y: layer.y, W: layer.w, H: layer.h}
-	SDL_Renderer.SetDrawBlendMode(sdl.BLENDMODE_NONE)
-	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.FillRect(&rect)
+	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
+	SDL_Renderer.Clear()
+
 	return ctx.String("")
 }
 
 func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	if !window_ok {
 		println("window not ready.")
-		return ctx.String("")
+		return ctx.Null()
 	}
 	handle := args[0].Int32()
 	layer := LayerList[handle]
@@ -131,15 +155,12 @@ func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []qui
 	dst_rect := sdl.Rect{X: 0, Y: 0, W: surface.W, H: surface.H}
 	src_rect := sdl.Rect{X: layer.x, Y: layer.y, W: layer.w, H: layer.h}
 
-	if handle > 1 {
-		return ctx.String("")
-	}
 	SDL_Renderer.SetRenderTarget(nil)
 	if err := SDL_Renderer.Copy(layer.texture, &src_rect, &dst_rect); err != nil {
 		panic(err)
 	}
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -153,7 +174,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 		println(err.Error())
 		panic(err)
 	}
-	window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+	//window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
 	sdl.GLSetSwapInterval(1)
 	SDL_Window = window
 
@@ -298,6 +319,7 @@ func iniSDL(ctx *quickjs.Context) {
 	SDL.Set("FillText", ctx.Function(SDL_FillText))
 	SDL.Set("FillRect", ctx.Function(SDL_FillRect))
 	SDL.Set("Triangle", ctx.Function(SDL_Triangle))
+	SDL.Set("FilledPolygonColor", ctx.Function(SDL_FilledPolygonColor))
 
 	// sound
 	mix.Init(mix.INIT_MP3 | mix.INIT_OGG)

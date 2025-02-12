@@ -42,9 +42,8 @@ class Surface extends SceneNode {
     this.WINDOW_WIDTH = WINDOW_WIDTH
     this.WINDOW_HEIGHT = WINDOW_HEIGHT
     this.fillStyle = '#ffffff'
-    this.context = new SurfaceContext()
-
     this.handle = SDL.CreateRGBSurface(this.WINDOW_WIDTH, this.WINDOW_HEIGHT)
+    this.context = new SurfaceContext(this.handle)
   }
   clear () {
     SDL.LayerClear(this.handle)
@@ -52,8 +51,9 @@ class Surface extends SceneNode {
 }
 
 class SurfaceContext {
-  constructor (WINDOW_WIDTH, WINDOW_HEIGHT) {
+  constructor (handle) {
     console.log([this.constructor.name, 'constructor'].join('.'))
+    this.handle = handle
     this.x = -1
     this.y = -1
     this.points = []
@@ -88,15 +88,9 @@ class SurfaceContext {
     console.log([this.constructor.name, 'fill'].join('.'))
     var color = toRGB(this.fillStyle)
 
-    const start_x = this.points_ready[0].x
-    const start_y = this.points_ready[0].y
-
-    for (var i = 1; i < this.points_ready.length - 1; i++) {
-      var tri = [{x: start_x, y: start_y}]
-      tri.push({x: this.points_ready[i].x, y: this.points_ready[i].y})
-      tri.push({x: this.points_ready[i + 1].x, y: this.points_ready[i + 1].y})
-      SDL.Triangle(this.handle ,tri, color.r, color.g, color.b)
-    }
+    var vx = this.points_ready.map(e => e.x)
+    var vy = this.points_ready.map(e => e.y)
+    SDL.FilledPolygonColor(this.handle ,vx, vy, color.r, color.g, color.b)
   }
   stroke () {
     console.log([this.constructor.name, 'stroke'].join('.'))
@@ -112,7 +106,7 @@ class SurfaceContext {
     var current_x = this.points_ready[0].x
     var current_y = this.points_ready[0].y
     for (var a of this.points_ready) {
-      if (a.x != current_x && a.y != current_y) {
+      if (a.x != current_x || a.y != current_y) {
         lines.push({
           start_x: current_x,
           start_y: current_y,
@@ -123,6 +117,12 @@ class SurfaceContext {
         current_y = a.y
       }
     }
+    lines.push({
+      start_x: current_x,
+      start_y: current_y,
+      end_x: this.points_ready[0].x,
+      end_y: this.points_ready[0].y
+    })
     SDL.DrawLine(this.handle ,lines, color.r, color.g, color.b)
   }
   fillRect (x, y, w, h) {
