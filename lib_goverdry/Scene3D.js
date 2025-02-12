@@ -10,13 +10,16 @@ class SceneNode {
   clear () {
     console.log(['[wip]', this.constructor.name, 'clear'].join('.'))
   }
+  update () {
+    console.log([this.constructor.name, 'update'].join('.'))
+  }
 }
 
 class Scene3D extends SceneNode {
   constructor () {
     super()
     console.log([this.constructor.name, 'constructor'].join('.'))
-    this.camera = new Camera()
+    this.camera = new Camera(this)
   }
   setAmbientLight (a) {
     console.log([this.constructor.name, 'setAmbientLight'].join('.'))

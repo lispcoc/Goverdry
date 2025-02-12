@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/buke/quickjs-go"
+	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -28,7 +29,8 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 		y1 := ret.Get("start_y").Int32()
 		x2 := ret.Get("end_x").Int32()
 		y2 := ret.Get("end_y").Int32()
-		SDL_Renderer.DrawLine(x1, y1, x2, y2)
+		gfx.ThickLineColor(SDL_Renderer, x1, y1, x2, y2, 2, sdl.Color{uint8(args[2].Uint32()), uint8(args[3].Uint32()), uint8(args[4].Uint32()), 255})
+		//SDL_Renderer.DrawLine(x1, y1, x2, y2)
 	}
 
 	return ctx.String("")
@@ -76,7 +78,7 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	txt, _ := SDL_Renderer.CreateTextureFromSurface(surface)
 	_, _, w, h, _ := txt.Query()
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.Copy(txt, &sdl.Rect{0, 0, w, h}, &sdl.Rect{x, y, x + w, x + h})
+	SDL_Renderer.Copy(txt, &sdl.Rect{0, 0, w, h}, &sdl.Rect{x, y, w, h})
 
 	return ctx.String("")
 }
@@ -95,6 +97,7 @@ func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	green := uint8(args[6].Int32())
 	blue := uint8(args[7].Int32())
 	rect := sdl.Rect{x, y, x + w, y + h}
+	SDL_Renderer.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	SDL_Renderer.SetDrawColor(red, green, blue, 255)
 	SDL_Renderer.SetRenderTarget(layer.texture)
 	SDL_Renderer.FillRect(&rect)
@@ -109,9 +112,34 @@ func SDL_LayerClear(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Val
 	handle := args[0].Int32()
 	layer := LayerList[handle]
 	rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
+	SDL_Renderer.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
 	SDL_Renderer.SetRenderTarget(layer.texture)
 	SDL_Renderer.FillRect(&rect)
+	return ctx.String("")
+}
+
+func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		println("window not ready.")
+		return ctx.String("")
+	}
+	handle := args[0].Int32()
+	layer := LayerList[handle]
+	surface, _ := SDL_Window.GetSurface()
+	dst_rect := sdl.Rect{0, 0, surface.W, surface.H}
+	src_rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
+
+	if handle > 1 {
+		return ctx.String("")
+	}
+	SDL_Renderer.SetRenderTarget(nil)
+	if err := SDL_Renderer.Copy(layer.texture, &src_rect, &dst_rect); err != nil {
+		panic(err)
+	}
+
+	SDL_Renderer.Present()
+
 	return ctx.String("")
 }
 
@@ -209,29 +237,16 @@ func Mix_PlayChannel(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Va
 	return ctx.Bool(true)
 }
 
-func updateWindow() {
-	if !window_ok {
-		println("window not ready.")
-		return
-	}
-	SDL_Renderer.SetRenderTarget(nil)
-
+func resetWindow() {
 	surface, _ := SDL_Window.GetSurface()
 	t, _ := SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, surface.W, surface.H)
 	t.SetBlendMode(sdl.BLENDMODE_NONE)
-	dst_rect := sdl.Rect{0, 0, surface.W, surface.H}
-	if err := SDL_Renderer.Copy(t, &dst_rect, &dst_rect); err != nil {
+
+	rect := sdl.Rect{0, 0, surface.W, surface.H}
+	SDL_Renderer.SetRenderTarget(nil)
+	if err := SDL_Renderer.Copy(t, &rect, &rect); err != nil {
 		panic(err)
 	}
-
-	for _, layer := range LayerList {
-		src_rect := sdl.Rect{layer.x, layer.y, layer.x + layer.w, layer.y + layer.h}
-		if err := SDL_Renderer.Copy(layer.texture, &src_rect, &dst_rect); err != nil {
-			panic(err)
-		}
-		SDL_Renderer.Present()
-	}
-	SDL_Renderer.Present()
 }
 
 func DummyFunction(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -242,6 +257,7 @@ func iniDummySDL(ctx *quickjs.Context) {
 	SDL := ctx.Object()
 	ctx.Globals().Set("SDL", SDL)
 	SDL.Set("CreateWindow", ctx.Function(DummyFunction))
+	SDL.Set("DrawSpriteToWindow", ctx.Function(DummyFunction))
 	SDL.Set("DrawLine", ctx.Function(DummyFunction))
 	SDL.Set("FillText", ctx.Function(DummyFunction))
 	SDL.Set("FillRect", ctx.Function(DummyFunction))
@@ -268,6 +284,7 @@ func iniSDL(ctx *quickjs.Context) {
 	SDL.Set("CreateWindow", ctx.Function(SDL_CreateWindow))
 	SDL.Set("CreateRGBSurface", ctx.Function(SDL_CreateRGBSurface))
 	SDL.Set("LayerClear", ctx.Function(SDL_LayerClear))
+	SDL.Set("DrawSpriteToWindow", ctx.Function(SDL_DrawSpriteToWindow))
 	SDL.Set("DrawLine", ctx.Function(SDL_DrawLine))
 	SDL.Set("FillText", ctx.Function(SDL_FillText))
 	SDL.Set("FillRect", ctx.Function(SDL_FillRect))

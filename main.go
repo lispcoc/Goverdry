@@ -214,7 +214,14 @@ func main() {
 			break
 		}
 
-		updateWindow()
+		// update window
+		resetWindow()
+		_, err = ctx.Eval("try { GameBody.rootScene.getCamera().update() } catch (error) {console.log(error); console.log(error.stack)}")
+		if err != nil {
+			println(err.Error())
+			break
+		}
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			println("PollEvent")
 			switch t := event.(type) {
@@ -231,7 +238,7 @@ func main() {
 				running = false
 			}
 		}
-		sdl.Delay(200)
+		sdl.Delay(16)
 	}
 	ctx.Close()
 	rt.Close()
