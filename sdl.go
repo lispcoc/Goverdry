@@ -13,6 +13,8 @@ var SDL_Renderer *sdl.Renderer
 var SDL_Window *sdl.Window
 var window_ok = false
 
+const FONT_SIZE = 14
+
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	if !window_ok {
 		return ctx.String("")
@@ -101,7 +103,7 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	txt, _ := SDL_Renderer.CreateTextureFromSurface(surface)
 	_, _, w, h, _ := txt.Query()
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y, W: w, H: h})
+	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y - FONT_SIZE, W: w, H: h})
 
 	txt.Destroy()
 	surface.Free()
@@ -122,7 +124,7 @@ func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	red := uint8(args[5].Int32())
 	green := uint8(args[6].Int32())
 	blue := uint8(args[7].Int32())
-	rect := sdl.Rect{X: x, Y: y, W: x + w, H: y + h}
+	rect := sdl.Rect{X: x, Y: y, W: w, H: h}
 	SDL_Renderer.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	SDL_Renderer.SetDrawColor(red, green, blue, 255)
 	SDL_Renderer.SetRenderTarget(layer.texture)
@@ -193,7 +195,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	window_ok = true
 
 	ttf.Init()
-	SDL_Font, err = ttf.OpenFont("HackGen35Console-Bold.ttf", 14)
+	SDL_Font, err = ttf.OpenFont("HackGen35Console-Bold.ttf", FONT_SIZE)
 	if err != nil {
 		println(err.Error())
 		panic(err)
@@ -299,14 +301,6 @@ func iniDummySDL(ctx *quickjs.Context) {
 }
 
 func iniSDL(ctx *quickjs.Context) {
-	//
-	// Window
-	//
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
-	}
-	defer sdl.Quit()
-
 	SDL := ctx.Object()
 	ctx.Globals().Set("SDL", SDL)
 	SDL.Set("CreateWindow", ctx.Function(SDL_CreateWindow))
@@ -324,10 +318,6 @@ func iniSDL(ctx *quickjs.Context) {
 	if err := mix.OpenAudio(48000, mix.DEFAULT_FORMAT, 1, 4096); err != nil {
 		mix.Quit()
 		panic(err)
-	}
-	mus, err := mix.LoadMUS("alarm.mp3")
-	if err == nil {
-		mus.Play(-1)
 	}
 
 	MIX := ctx.Object()

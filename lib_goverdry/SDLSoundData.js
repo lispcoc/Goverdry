@@ -2,7 +2,6 @@ class SDLSoundData {
   constructor (handle) {
     console.log([this.constructor.name, 'constructor', handle].join('.'))
     this.handle = handle
-    this.play()
   }
   clone() {
     console.log([this.constructor.name, 'clone'].join('.'))

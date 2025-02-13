@@ -48,6 +48,22 @@ class Surface extends SceneNode {
   clear () {
     SDL.LayerClear(this.handle)
   }
+  draw (img, x1, y1, w1, h1, x2, y2, w2, h2) {
+    console.log(
+      this.constructor.name,
+      'draw',
+      img,
+      x1,
+      y1,
+      w1,
+      h1,
+      x2,
+      y2,
+      w2,
+      h2
+    )
+    console.log('[Todo]draw is not implemented.')
+  }
 }
 
 class SurfaceContext {
@@ -77,16 +93,59 @@ class SurfaceContext {
     this.y = y
     this.points.push({ x: x, y: y })
   }
-  arc (x, y, r, a, b, c) {
-    console.log([this.constructor.name, 'arc'].join('.'))
+  arc (x, y, radius, startAngle, endAngle, counterclockwise = false) {
+    console.log(
+      this.constructor.name,
+      'arc',
+      x,
+      y,
+      radius,
+      startAngle,
+      endAngle,
+      counterclockwise
+    )
+    console.log('[Todo]arc is wip.')
+    if (!counterclockwise) {
+      const x1 = x + radius * Math.cos(startAngle)
+      const y1 = y - radius * Math.sin(startAngle)
+      const x2 = x + radius * Math.cos(endAngle)
+      const y2 = y - radius * Math.sin(endAngle)
+      this.lines.push({ x1: this.x, y1: this.y, x2: x1, y2: y1 })
+      this.lines.push({ x1: x1, y1: y1, x2: x2, y2: y2 })
+      this.x = x2
+      this.y = y2
+      this.points.push({ x: x1, y: y1 })
+      this.points.push({ x: x2, y: y2 })
+    } else {
+      const x1 = x + radius * Math.cos(startAngle)
+      const y1 = y + radius * Math.sin(startAngle)
+      const x2 = x + radius * Math.cos(endAngle)
+      const y2 = y + radius * Math.sin(endAngle)
+      this.lines.push({ x1: this.x, y1: this.y, x2: x1, y2: y1 })
+      this.lines.push({ x1: x1, y1: y1, x2: x2, y2: y2 })
+      this.x = x2
+      this.y = y2
+      this.points.push({ x: x1, y: y1 })
+      this.points.push({ x: x2, y: y2 })
+    }
   }
-  arcTo(x1, y1, x2, y2, radius){
-    console.log([this.constructor.name, 'arcTo', x1, y1, x2, y2, radius].join('.'))
+  arcTo (x1, y1, x2, y2, radius) {
+    console.log(this.constructor.name, 'arcTo', x1, y1, x2, y2, radius)
+    console.log('[Todo]arc is wip.')
+    this.lines.push({ x1: this.x, y1: this.y, x2: x, y2: y })
+    this.x = x
+    this.y = y
+    this.points.push({ x: x, y: y })
   }
   closePath () {
     console.log([this.constructor.name, 'closePath'].join('.'))
-    if(this.lines.length){
-      this.lines.push({ x1: this.x, y1: this.y, x2: this.lines[0].x1, y2: this.lines[0].y1 })
+    if (this.lines.length) {
+      this.lines.push({
+        x1: this.x,
+        y1: this.y,
+        x2: this.lines[0].x1,
+        y2: this.lines[0].y1
+      })
     }
   }
   fill () {
@@ -95,25 +154,25 @@ class SurfaceContext {
 
     var vx = this.points.map(e => e.x)
     var vy = this.points.map(e => e.y)
-    SDL.FilledPolygonColor(this.handle ,vx, vy, color.r, color.g, color.b)
+    SDL.FilledPolygonColor(this.handle, vx, vy, color.r, color.g, color.b)
   }
   stroke () {
     console.log([this.constructor.name, 'stroke'].join('.'))
     var color = toRGB(this.strokeStyle)
-    SDL.DrawLine(this.handle ,this.lines, color.r, color.g, color.b)
+    SDL.DrawLine(this.handle, this.lines, color.r, color.g, color.b)
   }
   fillRect (x, y, w, h) {
     console.log([this.constructor.name, 'fillRect'].join('.'))
     var color = toRGB(this.fillStyle)
-    SDL.FillRect(this.handle ,x, y, w, h, color.r, color.g, color.b)
+    SDL.FillRect(this.handle, x, y, w, h, color.r, color.g, color.b)
   }
   fillText (Text, x, y) {
     console.log([this.constructor.name, 'fillText', Text, x, y].join('.'))
     var color = toRGB(this.fillStyle)
-    SDL.FillText(this.handle ,Text, x, y, color.r, color.g, color.b)
+    SDL.FillText(this.handle, Text, x, y, color.r, color.g, color.b)
   }
-  drawImage(img, x, y) {
+  drawImage (img, x, y) {
     console.log([this.constructor.name, 'drawImage', img, x, y].join('.'))
-    console.log("[Todo]drawImage is not implemented.")
+    console.log('[Todo]drawImage is not implemented.')
   }
 }

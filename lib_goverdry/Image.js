@@ -14,8 +14,8 @@ function loadImage() {
   for (var e of image_reminder){
     if(!e.ready && e.onload) {
       console.log(e.src)
-      //e.onload()
-      //e.ready = true
+      e.onload()
+      e.ready = true
     }
   }
 }

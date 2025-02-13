@@ -60,22 +60,6 @@ func initDocument(ctx *quickjs.Context) {
 	ctx.Globals().Set("DocumentHelper", document_helper)
 }
 
-func initWindow(ctx *quickjs.Context) {
-	window := ctx.Object()
-
-	window.Set("focus", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-		fmt.Println("window.focus")
-		return ctx.String("")
-	}))
-
-	window.Set("addEventListener", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-		fmt.Println("window.addEventListener")
-		return ctx.String("")
-	}))
-
-	ctx.Globals().Set("window", window)
-}
-
 func requestAnimationFrame(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	result := strings.Split(args[0].String(), "(")
 	result = strings.Split(result[0], " ")
@@ -103,7 +87,7 @@ func main() {
 	headless := false
 	for _, v := range os.Args {
 		if v == "--headless" {
-			fmt.Printf("Run in headless mode.")
+			fmt.Printf("Run in headless mode.\n")
 			headless = true
 		}
 	}
@@ -127,48 +111,58 @@ func main() {
 		println(err.Error())
 	}
 
-	files, _ := os.ReadDir("lib")
-	for _, f := range files {
-		fmt.Println(f.Name())
-		ret, err := ctx.EvalFile("lib/" + f.Name())
-		if err != nil {
-			println(err.Error())
-		}
-		fmt.Println(ret.Get("stack").String())
-	}
-
 	initConsole(ctx)
-
-	files, _ = os.ReadDir("lib_goverdry")
-	for _, f := range files {
-		fmt.Println(f.Name())
-		ret, err := ctx.EvalFile("lib_goverdry/" + f.Name())
-		if err != nil {
-			println(err.Error())
-		}
-		fmt.Println(ret.Get("stack").String())
-	}
-
 	initDocument(ctx)
-	initWindow(ctx)
 	initAnimation(ctx)
 	initIO(ctx)
 	if headless {
 		iniDummySDL(ctx)
 	} else {
+		var v sdl.Version
+		sdl.VERSION(&v)
+		fmt.Printf("SDL Version %d.%d.%d\n", v.Major, v.Minor, v.Patch)
+
+		if err := sdl.Init(sdl.INIT_EVERYTHING | sdl.INIT_JOYSTICK); err != nil {
+			panic(err)
+		}
+		defer sdl.Quit()
+
+		joysticks := sdl.NumJoysticks()
+		fmt.Printf("There are %d joysticks connected.\n", joysticks)
+		if joysticks > 0 {
+			if sdl.JoystickOpen(0) == nil {
+				fmt.Printf("There was an error reading from the joystick.\n")
+			}
+		}
+
 		iniSDL(ctx)
 	}
 
-	pre_files := []string{"SpellEffect.min.js"}
+	files, _ := os.ReadDir("lib_goverdry")
+	for _, f := range files {
+		fmt.Println(f.Name())
+		_, err := ctx.EvalFile("lib_goverdry/" + f.Name())
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	files, _ = os.ReadDir("lib")
+	for _, f := range files {
+		fmt.Println(f.Name())
+		_, err := ctx.EvalFile("lib/" + f.Name())
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	pre_files := []string{"SpellEffect.min.js", "MainPanel.min.js"}
 	for _, f := range pre_files {
 		fmt.Println(f)
-		ret, err := ctx.EvalFile("js/" + f)
+		_, err := ctx.EvalFile("js/" + f)
 		if err != nil {
-			println(err.Error())
-			println(ret.Error().Error())
+			panic(err)
 		}
-		fmt.Println(ret.String())
-		fmt.Println(ret.Get("stack").String())
 	}
 
 	files, _ = os.ReadDir("js")
@@ -176,18 +170,20 @@ func main() {
 		if slices.Contains(pre_files, f.Name()) {
 			continue
 		}
-		fmt.Println(f.Name())
-		ret, err := ctx.EvalFile("js/" + f.Name())
+		println(f.Name())
+		_, err := ctx.EvalFile("js/" + f.Name())
 		if err != nil {
-			println(err.Error())
-			println(ret.Error())
+			panic(err)
 		}
-		fmt.Println(ret.String())
 	}
 	ctx.Loop()
 
 	// Window Events
 	_, err = ctx.Eval("try { window.onload() } catch (error) {console.log(error); console.log(error.stack)}")
+	if err != nil {
+		println(err.Error())
+	}
+	_, err = ctx.Eval("try { window.emit({ id: 'gamepadconnected',  gamepad: { index: 0 } }) } catch (error) {console.log(error); console.log(error.stack)}")
 	if err != nil {
 		println(err.Error())
 	}
@@ -202,13 +198,12 @@ func main() {
 			if use_timestamp {
 				f = currentFunc + "(" + strconv.FormatInt(elapsed.Milliseconds(), 10) + ")"
 			}
-			println(f)
 			_, err := ctx.Eval("try { " + f + " } catch (error) {console.log(error); console.log(error.stack)}")
 			if err != nil {
 				println(err.Error())
 				break
 			}
-			s = time.Now()
+			ctx.Globals().Get("navigator").Get("gamepad").Call("clearButtonPressed")
 		}
 		ctx.Loop()
 
@@ -217,6 +212,15 @@ func main() {
 		if err != nil {
 			println(err.Error())
 			break
+		}
+
+		ret, err := ctx.Eval("GameState == 'stopStart'")
+		if err != nil {
+			println(err.Error())
+			break
+		}
+		if ret.Bool() {
+			ctx.Eval("try { document.emit({ id: 'mousedown',  target: { id: 'game_window' }}) } catch (error) {console.log(error); console.log(error.stack)}")
 		}
 
 		// update window
@@ -229,11 +233,12 @@ func main() {
 		applyWindow()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			println("PollEvent")
 			switch t := event.(type) {
 			case *sdl.JoyButtonEvent:
-				if t.Button == 1 {
-					running = false
+				if t.State > 0 {
+					ctx.Globals().Get("navigator").Get("gamepad").Call("pressButton", ctx.Int32(int32(t.Button)))
+				} else {
+					ctx.Globals().Get("navigator").Get("gamepad").Call("releaseButton", ctx.Int32(int32(t.Button)))
 				}
 			case *sdl.KeyboardEvent:
 				if t.Keysym.Sym == sdl.K_q {
