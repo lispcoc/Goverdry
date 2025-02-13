@@ -80,6 +80,9 @@ class SurfaceContext {
   arc (x, y, r, a, b, c) {
     console.log([this.constructor.name, 'arc'].join('.'))
   }
+  arcTo(x1, y1, x2, y2, radius){
+    console.log([this.constructor.name, 'arcTo', x1, y1, x2, y2, radius].join('.'))
+  }
   closePath () {
     console.log([this.constructor.name, 'closePath'].join('.'))
     if(this.lines.length){

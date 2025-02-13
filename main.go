@@ -56,30 +56,8 @@ func initIO(ctx *quickjs.Context) {
 }
 
 func initDocument(ctx *quickjs.Context) {
-	document := ctx.Object()
-
-	document.Set("addEventListener", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-		fmt.Println("document.addEventListener " + args[0].String())
-		return ctx.String("")
-	}))
-
-	document.Set("getElementById", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-		fmt.Println("document.getElementById " + args[0].String())
-		element := ctx.Object()
-		element.Set("innerHTML", ctx.String(":"))
-		return element
-	}))
-	document.Set("createElement", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-		fmt.Println("document.createElement " + args[0].String())
-		element, _ := ctx.Eval("new DocumentElement()")
-		return element
-	}))
-
-	ctx.Globals().Set("document", document)
-
-	document_location := ctx.Object()
-	document.Set("location", document_location)
-	document_location.Set("hostname", ctx.String("fake"))
+	document_helper := ctx.Object()
+	ctx.Globals().Set("DocumentHelper", document_helper)
 }
 
 func initWindow(ctx *quickjs.Context) {
