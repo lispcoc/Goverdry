@@ -44,6 +44,7 @@ class Surface extends SceneNode {
     this.fillStyle = '#ffffff'
     this.handle = SDL.CreateRGBSurface(this.WINDOW_WIDTH, this.WINDOW_HEIGHT)
     this.context = new SurfaceContext(this.handle)
+    this._element = { src: 0 }
   }
   clear () {
     SDL.LayerClear(this.handle)
@@ -78,12 +79,12 @@ class SurfaceContext {
   }
   getImageData (sx, sy, sw, sh, settings = {}) {
     console.log(this.constructor.name, 'getImageData', sx, sy, sw, sh)
-    console.log("wip")
+    console.log('wip')
     return this.image_data
   }
-  putImageData(imageData, dx, dy) {
+  putImageData (imageData, dx, dy) {
     console.log(this.constructor.name, 'putImageData', imageData, dx, dy)
-    console.log("wip")
+    console.log('wip')
   }
   beginPath () {
     console.log([this.constructor.name, 'beginPath'].join('.'))
