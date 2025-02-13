@@ -4,8 +4,8 @@ DirName["music"] = "./music/";
 DirName["sound"] = "./sound/";
 
 // 初期設定
-InitialConfigData["Bgm"] = "false";
-InitialConfigData["Se"] = "false";
+InitialConfigData["Bgm"] = "true";
+InitialConfigData["Se"] = "true";
 InitialConfigData["ControllerAlign"] = "left";
 InitialConfigData["GamePad"] = "true";
 InitialConfigData["Dungeon"] = "wireFrame";

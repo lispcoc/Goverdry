@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/buke/quickjs-go"
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
@@ -252,13 +254,38 @@ func Mix_LoadMUS(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value)
 }
 
 func Mix_PlayChannel(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-	mus := MusList[args[0].Int32()]
-	err := mus.Play(0)
-	if err != nil {
-		println(err.Error())
-		return ctx.Bool(false)
+	volume := int(args[1].Float64() * mix.MAX_VOLUME)
+	mix.VolumeMusic(volume)
+	playMusic(args[0].Int32(), 0, 0)
+	return ctx.Null()
+}
+
+var current_music int32
+
+type MusicStack struct {
+	handle   int32
+	pos      float64
+	lasttime time.Time
+}
+
+var music_stack []MusicStack
+
+func playMusic(handle int32, loop int, pos float64) {
+	if mix.PlayingMusic() {
+		music_stack = append(music_stack, MusicStack{handle: current_music, pos: mix.GetMusicPosition(MusList[current_music]), lasttime: time.Now()})
 	}
-	return ctx.Bool(true)
+	MusList[handle].Play(loop)
+	mix.SetMusicPosition(int64(pos))
+	current_music = handle
+}
+
+func musicFinished() {
+	if len(music_stack) > 0 {
+		m := music_stack[len(music_stack)-1]
+		pos := m.pos + time.Since(m.lasttime).Seconds()
+		playMusic(m.handle, 0, pos)
+		music_stack = music_stack[:len(music_stack)-1]
+	}
 }
 
 func resetWindow() {
@@ -325,4 +352,5 @@ func iniSDL(ctx *quickjs.Context) {
 	MIX.Set("LoadWAV", ctx.Function(MIX_LoadWAV))
 	MIX.Set("LoadMUS", ctx.Function(Mix_LoadMUS))
 	MIX.Set("PlayChannel", ctx.Function(Mix_PlayChannel))
+	mix.HookMusicFinished(musicFinished)
 }

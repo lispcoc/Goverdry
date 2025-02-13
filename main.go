@@ -254,22 +254,22 @@ func main() {
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
-			case *sdl.JoyButtonEvent:
+			case sdl.JoyButtonEvent:
 				if t.State > 0 {
 					ctx.Globals().Get("navigator").Get("gamepad").Call("pressButton", ctx.Int32(int32(t.Button)))
 				} else {
 					ctx.Globals().Get("navigator").Get("gamepad").Call("releaseButton", ctx.Int32(int32(t.Button)))
 				}
-			case *sdl.KeyboardEvent:
+			case sdl.KeyboardEvent:
 				if t.Keysym.Sym == sdl.K_q {
 					running = false
 				}
-			case *sdl.QuitEvent: // NOTE: Please use `*sdl.QuitEvent` for `v0.4.x` (current version).
+			case sdl.QuitEvent:
 				println("Quit")
 				running = false
 			}
 		}
-		sdl.Delay(16)
+		sdl.Delay(33)
 	}
 	ctx.Close()
 	rt.Close()

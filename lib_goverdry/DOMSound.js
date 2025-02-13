@@ -18,12 +18,14 @@ class DOMSoundClass {
 
     var handle = -1
     handle = MIX.LoadMUS(src)
+    var sound = null
     if (handle < 0) {
       f_error(null)
     } else {
-      f_success(new SDLSoundData(handle))
+      sound = new SDLSoundData(handle, src)
+      f_success(sound)
     }
-    return null
+    return sound
   }
 }
 
