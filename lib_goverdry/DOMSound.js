@@ -2,7 +2,7 @@ soundhandle = 0
 
 class DOMSoundClass {
   constructor () {
-    console.log([this.constructor.name, 'constructor'].join('.'))
+    console.log(this.constructor.name, 'constructor')
   }
   load (src, type, f_success, f_error) {
     console.log(

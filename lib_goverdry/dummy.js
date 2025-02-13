@@ -12,7 +12,7 @@ class DummyEnchant {
 class DummyWebFont {
   constructor (a) {}
   load (a) {
-    console.log(['[wip]', this.constructor.name, 'load'].join('.'))
+    console.log('[wip]', this.constructor.name, 'load')
     a.active()
   }
 }

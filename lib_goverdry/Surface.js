@@ -38,7 +38,7 @@ function toRGB (s) {
 class Surface extends SceneNode {
   constructor (WINDOW_WIDTH, WINDOW_HEIGHT) {
     super()
-    console.log([this.constructor.name, 'constructor'].join('.'))
+    console.log(this.constructor.name, 'constructor')
     this.WINDOW_WIDTH = WINDOW_WIDTH
     this.WINDOW_HEIGHT = WINDOW_HEIGHT
     this.fillStyle = '#ffffff'
@@ -69,7 +69,7 @@ class Surface extends SceneNode {
 
 class SurfaceContext {
   constructor (handle) {
-    console.log([this.constructor.name, 'constructor'].join('.'))
+    console.log(this.constructor.name, 'constructor')
     this.handle = handle
     this.x = -1
     this.y = -1
@@ -87,18 +87,18 @@ class SurfaceContext {
     console.log('wip')
   }
   beginPath () {
-    console.log([this.constructor.name, 'beginPath'].join('.'))
+    console.log(this.constructor.name, 'beginPath')
     this.points = []
     this.lines = []
   }
   moveTo (x, y) {
-    console.log([this.constructor.name, 'moveTo'].join('.'))
+    console.log(this.constructor.name, 'moveTo')
     this.x = x
     this.y = y
     this.points = [{ x: x, y: y }]
   }
   lineTo (x, y) {
-    console.log([this.constructor.name, 'lineTo'].join('.'))
+    console.log(this.constructor.name, 'lineTo')
     this.lines.push({ x1: this.x, y1: this.y, x2: x, y2: y })
     this.x = x
     this.y = y
@@ -149,7 +149,7 @@ class SurfaceContext {
     this.points.push({ x: x, y: y })
   }
   closePath () {
-    console.log([this.constructor.name, 'closePath'].join('.'))
+    console.log(this.constructor.name, 'closePath')
     if (this.lines.length) {
       this.lines.push({
         x1: this.x,
@@ -160,7 +160,7 @@ class SurfaceContext {
     }
   }
   fill () {
-    console.log([this.constructor.name, 'fill'].join('.'))
+    console.log(this.constructor.name, 'fill')
     var color = toRGB(this.fillStyle)
 
     var vx = this.points.map(e => e.x)
@@ -168,22 +168,22 @@ class SurfaceContext {
     SDL.FilledPolygonColor(this.handle, vx, vy, color.r, color.g, color.b)
   }
   stroke () {
-    console.log([this.constructor.name, 'stroke'].join('.'))
+    console.log(this.constructor.name, 'stroke')
     var color = toRGB(this.strokeStyle)
     SDL.DrawLine(this.handle, this.lines, color.r, color.g, color.b)
   }
   fillRect (x, y, w, h) {
-    console.log([this.constructor.name, 'fillRect'].join('.'))
+    console.log(this.constructor.name, 'fillRect')
     var color = toRGB(this.fillStyle)
     SDL.FillRect(this.handle, x, y, w, h, color.r, color.g, color.b)
   }
   fillText (Text, x, y) {
-    console.log([this.constructor.name, 'fillText', Text, x, y].join('.'))
+    console.log(this.constructor.name, 'fillText', Text, x, y)
     var color = toRGB(this.fillStyle)
     SDL.FillText(this.handle, Text, x, y, color.r, color.g, color.b)
   }
   drawImage (img, x, y) {
-    console.log([this.constructor.name, 'drawImage', img, x, y].join('.'))
+    console.log(this.constructor.name, 'drawImage', img, x, y)
     console.log('[Todo]drawImage is not implemented.')
   }
 }

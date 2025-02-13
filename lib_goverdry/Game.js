@@ -1,6 +1,6 @@
 class Game {
   constructor (windowWidth, windowHeight) {
-    console.log([this.constructor.name, 'constructor'].join('.'))
+    console.log(this.constructor.name, 'constructor')
     this.windowWidth = windowWidth
     this.windowHeight = windowHeight
     this.rootScene = new Scene3D()
@@ -9,7 +9,7 @@ class Game {
   }
 
   start () {
-    console.log([this.constructor.name, 'start'].join('.'))
+    console.log(this.constructor.name, 'start')
     SDL.CreateWindow(this.width, this.height)
   }
 }

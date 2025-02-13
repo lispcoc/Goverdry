@@ -23,16 +23,16 @@ class Plane {
     this.z = 0
   }
   scale () {
-    console.log([this.constructor.name, 'scale'].join('.'))
+    console.log(this.constructor.name, 'scale')
   }
   rotateYaw (a) {
-    console.log([this.constructor.name, 'rotateYaw'].join('.'))
+    console.log(this.constructor.name, 'rotateYaw')
   }
   rotatePitch () {
-    console.log([this.constructor.name, 'rotatePitch'].join('.'))
+    console.log(this.constructor.name, 'rotatePitch')
   }
   rotateRoll () {
-    console.log([this.constructor.name, 'rotateRoll'].join('.'))
+    console.log(this.constructor.name, 'rotateRoll')
   }
 }
 
