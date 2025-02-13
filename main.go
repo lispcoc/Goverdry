@@ -106,11 +106,6 @@ func main() {
 	ctx := rt.NewContext()
 	defer ctx.Close()
 
-	_, err := ctx.EvalFile("test_data/gameDataHTML5.js")
-	if err != nil {
-		println(err.Error())
-	}
-
 	initConsole(ctx)
 	initDocument(ctx)
 	initAnimation(ctx)
@@ -178,8 +173,13 @@ func main() {
 	}
 	ctx.Loop()
 
+	// read test data
+	ctx.EvalFile("test_data/gameDataHTML5.js")
+	ctx.EvalFile("test_data/defaultMessage_jpn.js")
+	ctx.EvalFile("test_data/config.js")
+
 	// Window Events
-	_, err = ctx.Eval("try { window.onload() } catch (error) {console.log(error); console.log(error.stack)}")
+	_, err := ctx.Eval("try { window.onload() } catch (error) {console.log(error); console.log(error.stack)}")
 	if err != nil {
 		println(err.Error())
 	}

@@ -253,7 +253,7 @@ func Mix_LoadMUS(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value)
 
 func Mix_PlayChannel(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	mus := MusList[args[0].Int32()]
-	err := mus.Play(-1)
+	err := mus.Play(0)
 	if err != nil {
 		println(err.Error())
 		return ctx.Bool(false)
