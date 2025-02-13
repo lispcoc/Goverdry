@@ -57,12 +57,12 @@ class SurfaceContext {
     this.x = -1
     this.y = -1
     this.points = []
-    this.points_ready = []
+    this.lines = []
   }
   beginPath () {
     console.log([this.constructor.name, 'beginPath'].join('.'))
     this.points = []
-    this.points_ready = []
+    this.lines = []
   }
   moveTo (x, y) {
     console.log([this.constructor.name, 'moveTo'].join('.'))
@@ -72,6 +72,7 @@ class SurfaceContext {
   }
   lineTo (x, y) {
     console.log([this.constructor.name, 'lineTo'].join('.'))
+    this.lines.push({ x1: this.x, y1: this.y, x2: x, y2: y })
     this.x = x
     this.y = y
     this.points.push({ x: x, y: y })
@@ -81,49 +82,22 @@ class SurfaceContext {
   }
   closePath () {
     console.log([this.constructor.name, 'closePath'].join('.'))
-    this.points_ready = this.points
-    this.points = []
+    if(this.lines.length){
+      this.lines.push({ x1: this.x, y1: this.y, x2: this.lines[0].x1, y2: this.lines[0].y1 })
+    }
   }
   fill () {
     console.log([this.constructor.name, 'fill'].join('.'))
     var color = toRGB(this.fillStyle)
 
-    var vx = this.points_ready.map(e => e.x)
-    var vy = this.points_ready.map(e => e.y)
+    var vx = this.points.map(e => e.x)
+    var vy = this.points.map(e => e.y)
     SDL.FilledPolygonColor(this.handle ,vx, vy, color.r, color.g, color.b)
   }
   stroke () {
     console.log([this.constructor.name, 'stroke'].join('.'))
-    if(this.points_ready.length == 0) {
-      this.closePath ()
-    }
-    if(this.points_ready.length == 0) {
-      console.log("Error: no points to draw.")
-      return
-    }
     var color = toRGB(this.strokeStyle)
-    var lines = []
-    var current_x = this.points_ready[0].x
-    var current_y = this.points_ready[0].y
-    for (var a of this.points_ready) {
-      if (a.x != current_x || a.y != current_y) {
-        lines.push({
-          start_x: current_x,
-          start_y: current_y,
-          end_x: a.x,
-          end_y: a.y
-        })
-        current_x = a.x
-        current_y = a.y
-      }
-    }
-    lines.push({
-      start_x: current_x,
-      start_y: current_y,
-      end_x: this.points_ready[0].x,
-      end_y: this.points_ready[0].y
-    })
-    SDL.DrawLine(this.handle ,lines, color.r, color.g, color.b)
+    SDL.DrawLine(this.handle ,this.lines, color.r, color.g, color.b)
   }
   fillRect (x, y, w, h) {
     console.log([this.constructor.name, 'fillRect'].join('.'))

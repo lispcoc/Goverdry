@@ -24,10 +24,10 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 
 	for i := 0; i < int(args[1].ToArray().Len()); i++ {
 		ret, _ := args[1].ToArray().Get(int64(i))
-		x1 := ret.Get("start_x").Int32()
-		y1 := ret.Get("start_y").Int32()
-		x2 := ret.Get("end_x").Int32()
-		y2 := ret.Get("end_y").Int32()
+		x1 := ret.Get("x1").Int32()
+		y1 := ret.Get("y1").Int32()
+		x2 := ret.Get("x2").Int32()
+		y2 := ret.Get("y2").Int32()
 		color := sdl.Color{R: uint8(args[2].Uint32()), G: uint8(args[3].Uint32()), B: uint8(args[4].Uint32()), A: 255}
 		gfx.ThickLineColor(SDL_Renderer, x1, y1, x2, y2, 2, color)
 	}
