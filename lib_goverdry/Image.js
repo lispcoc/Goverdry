@@ -10,6 +10,13 @@ class Image {
   }
 }
 
+class ImageData {
+  constructor () {
+    console.log([this.constructor.name, 'constructor'].join('.'))
+    this.data = []
+  }
+}
+
 function loadImage() {
   for (var e of image_reminder){
     if(!e.ready && e.onload) {

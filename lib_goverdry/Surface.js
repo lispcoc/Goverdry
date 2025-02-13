@@ -74,6 +74,16 @@ class SurfaceContext {
     this.y = -1
     this.points = []
     this.lines = []
+    this.image_data = new ImageData()
+  }
+  getImageData (sx, sy, sw, sh, settings = {}) {
+    console.log(this.constructor.name, 'getImageData', sx, sy, sw, sh)
+    console.log("wip")
+    return this.image_data
+  }
+  putImageData(imageData, dx, dy) {
+    console.log(this.constructor.name, 'putImageData', imageData, dx, dy)
+    console.log("wip")
   }
   beginPath () {
     console.log([this.constructor.name, 'beginPath'].join('.'))

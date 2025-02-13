@@ -3,6 +3,7 @@ package main
 import "C"
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -28,6 +29,24 @@ func initConsole(ctx *quickjs.Context) {
 		return ctx.String(line)
 	}))
 	ctx.Globals().Set("console", console)
+}
+
+func initBase64(ctx *quickjs.Context) {
+	console := ctx.Object()
+	console.Set("decode", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+		str := args[0].String()
+		bytes, err := base64.StdEncoding.DecodeString(str)
+		if err != nil {
+			panic(err)
+		}
+		return ctx.String(string(bytes))
+	}))
+	console.Set("encode", ctx.Function(func(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+		str := args[0].String()
+		str = base64.StdEncoding.EncodeToString([]byte(str))
+		return ctx.String(str)
+	}))
+	ctx.Globals().Set("base64", console)
 }
 
 func initIO(ctx *quickjs.Context) {
@@ -107,6 +126,7 @@ func main() {
 	defer ctx.Close()
 
 	initConsole(ctx)
+	initBase64(ctx)
 	initDocument(ctx)
 	initAnimation(ctx)
 	initIO(ctx)
