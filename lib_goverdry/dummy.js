@@ -1,5 +1,6 @@
 GoverdryTodo = false
 GoverdryPatch = true
+GoverdrySaveTweak = true
 
 class DummyEnchant {
   constructor () {
