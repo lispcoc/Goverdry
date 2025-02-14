@@ -1,14 +1,14 @@
 class Sprite extends SceneNode {
-  constructor (WINDOW_WIDTH, WINDOW_HEIGHT) {
+  constructor (width, height) {
     super()
     console.log(this.constructor.name, 'constructor')
-    this.WINDOW_WIDTH = WINDOW_WIDTH
-    this.WINDOW_HEIGHT = WINDOW_HEIGHT
+    this.width = width
+    this.height = height
   }
   update () {
-    this.drawToWindow(this.WINDOW_WIDTH, this.WINDOW_HEIGHT)
+    this.drawToWindow(this.width, this.height)
   }
   drawToWindow () {
-    SDL.DrawSpriteToWindow(this.image.handle)
+    SDL.DrawSpriteToWindow(this.image.handle, 0, 0, this.width, this.height)
   }
 }

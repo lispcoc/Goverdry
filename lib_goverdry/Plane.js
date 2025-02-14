@@ -28,7 +28,6 @@ class Plane {
       [-1, -1, 0],
       [1, -1, 0]
     ]
-    this.points = math.multiply(this.points, 0.5)
   }
   scale (x, y, z) {
     for (let i = 0; i < this.points.length; i++) {
@@ -74,21 +73,28 @@ class Plane {
     console.log(JSON.stringify(this.points))
   }
   update (ctx) {
-    this.x = 200
-    this.y = 200
-    this.scale(16, 16, 1)
+    console.log(this.x, this.y, this.z)
     // Line
     ctx.beginPath()
-    ctx.moveTo(this.x + this.points[0][0], this.y + this.points[0][1])
-    for (let i = 1; i < this.points.length; i++) {
-      const x = this.x + this.points[i][0]
-      const y = this.y + this.points[i][1]
-      ctx.lineTo(x, y)
+    for (let i = 0; i < this.points.length; i++) {
+      const z = this.z + this.points[i][2] + MP.CAMERA_Z
+      var x =
+        GameBody.width * 2 +
+        ((this.x + this.points[i][0]) * GameBody.width) / 2 / z
+      var y =
+        GameBody.height * 2 -
+        ((this.y + this.points[i][1]) * GameBody.width * 2) / z
+      x = x >= 0 ? x : 0
+      y = y >= 0 ? y : 0
+      if (i == 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
+      }
     }
     ctx.closePath()
     ctx.fill()
     ctx.stroke()
-    this.scale(1/16, 1/16, 1)
   }
 }
 
@@ -105,7 +111,6 @@ class PlaneXZ extends Plane {
       [-1, 0, -1],
       [1, 0, -1]
     ]
-    this.points = math.multiply(this.points, 0.5)
   }
 }
 

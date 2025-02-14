@@ -45,6 +45,11 @@ class Surface extends SceneNode {
     this.context = new SurfaceContext(this.handle)
     this._element = { src: 0 }
   }
+  clone () {
+    let r = super.clone ()
+    r.context = this.context
+    return r
+  }
   clear () {
     SDL.LayerClear(this.handle)
   }

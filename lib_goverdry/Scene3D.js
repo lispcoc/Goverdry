@@ -13,9 +13,11 @@ class SceneNode {
   update () {
     console.log(this.constructor.name, 'update')
   }
-  clone() {
+  clone () {
     console.log(this.constructor.name, 'clone')
-    return this
+    let r = JSON.parse(JSON.stringify(this))
+    r.childNodes = this.childNodes
+    return r
   }
 }
 
