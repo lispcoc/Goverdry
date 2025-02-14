@@ -316,6 +316,9 @@ func main() {
 	println("main loop")
 	running := true
 	s := time.Now()
+	fps := 0
+	chktime := time.Now()
+	frametime := time.Now()
 	for running {
 		elapsed := time.Since(s)
 		if currentFunc != "" {
@@ -380,7 +383,18 @@ func main() {
 				running = false
 			}
 		}
-		sdl.Delay(33)
+
+		// fps limitter
+		for time.Since(frametime).Milliseconds() < 33 {
+			sdl.Delay(1)
+		}
+		frametime = time.Now()
+		fps++
+		if time.Since(chktime).Milliseconds() >= 1000 {
+			fmt.Printf("fps: %d\n", fps)
+			fps = 0
+			chktime = time.Now()
+		}
 	}
 	ctx.Close()
 	rt.Close()

@@ -36,7 +36,6 @@ class Document {
     return new DocumentElement()
   }
   emit (event) {
-    console.log(this.constructor.name, 'emit', event)
     for (const e of this.events) {
       if (event.id == e.id) {
         e.listener(event)

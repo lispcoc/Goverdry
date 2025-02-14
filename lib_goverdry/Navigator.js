@@ -14,7 +14,6 @@ class Navigator {
   }
 
   getGamepads () {
-    console.log(this.constructor.name, 'getGamepads')
     return [this.gamepad]
   }
 }
