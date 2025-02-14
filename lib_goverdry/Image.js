@@ -8,6 +8,9 @@ class Image {
     this.ready = false
     this.width = 1
     this.height = 1
+    this.src = null
+    this.onload = null
+    this.onerror = null
   }
 }
 
@@ -20,12 +23,20 @@ class ImageData {
 }
 
 function loadImage () {
-  console.log(this.constructor.name, 'loadImage')
-  console.log('[Todo]not implemented.')
   for (var e of image_reminder) {
     if (!e.ready && e.onload) {
+      console.log("loadImage")
       console.log(e.src)
-      e.onerror()
+      let ret = IMG.Load(e.src)
+      if(ret == null){
+        e.onerror()
+      } else {
+        console.log("load success.")
+        console.log(ret.w, ret.h)
+        e.width = ret.w
+        e.height = ret.h
+        e.onload()
+      }
       e.ready = true
     }
   }

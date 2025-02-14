@@ -36,24 +36,24 @@ function toRGB (s) {
 }
 
 class Surface extends SceneNode {
-  constructor (WINDOW_WIDTH, WINDOW_HEIGHT) {
+  constructor (width, height) {
     super()
     console.log(this.constructor.name, 'constructor')
-    this.WINDOW_WIDTH = WINDOW_WIDTH
-    this.WINDOW_HEIGHT = WINDOW_HEIGHT
+    this.width = width
+    this.height = height
     this.fillStyle = '#ffffff'
-    this.handle = SDL.CreateRGBSurface(this.WINDOW_WIDTH, this.WINDOW_HEIGHT)
+    this.handle = SDL.CreateRGBSurface(width, height)
     this.context = new SurfaceContext(this.handle)
     this._element = { src: 0 }
   }
   clear () {
     SDL.LayerClear(this.handle)
   }
-  draw (img, x1, y1, w1, h1, x2, y2, w2, h2) {
+  draw (src_surface, x1, y1, w1, h1, x2, y2, w2, h2) {
     console.log(
       this.constructor.name,
       'draw',
-      img,
+      src_surface.handle,
       x1,
       y1,
       w1,
@@ -63,7 +63,7 @@ class Surface extends SceneNode {
       w2,
       h2
     )
-    console.log('[Todo]draw is not implemented.')
+    SDL.Copy(src_surface.handle, this.handle, x1, y1, w1, h1, x2, y2, w2, h2)
   }
 }
 
@@ -183,7 +183,18 @@ class SurfaceContext {
     SDL.FillText(this.handle, Text, x, y, color.r, color.g, color.b)
   }
   drawImage (img, x, y) {
-    console.log(this.constructor.name, 'drawImage', img, x, y)
-    console.log('[Todo]drawImage is not implemented.')
+    console.log(this.constructor.name, 'drawImage', img.src, x, y)
+    SDL.DrawImage(
+      this.handle,
+      img.src,
+      0,
+      0,
+      img.width,
+      img.height,
+      x,
+      y,
+      img.width,
+      img.height
+    )
   }
 }

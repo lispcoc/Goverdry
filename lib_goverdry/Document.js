@@ -21,7 +21,7 @@ class Document {
           'LoadingScreen:1',
           'NotLoadSaveData:off',
           'NoSoundAllowed:off',
-          'GraphicPrefetch:off',
+          'GraphicPrefetch:on',
           'SoundPrefetch:off',
           'GraphicLimit:off',
           'GraphicCache:on',

@@ -5,6 +5,7 @@ import (
 
 	"github.com/buke/quickjs-go"
 	"github.com/veandco/go-sdl2/gfx"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -167,6 +168,30 @@ func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []qui
 	return ctx.Null()
 }
 
+func SDL_Copy(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		println("window not ready.")
+		return ctx.Null()
+	}
+	src_handle := args[0].Int32()
+	dst_handle := args[1].Int32()
+	x1 := args[2].Int32()
+	y1 := args[3].Int32()
+	w1 := args[4].Int32()
+	h1 := args[5].Int32()
+	x2 := args[6].Int32()
+	y2 := args[7].Int32()
+	w2 := args[8].Int32()
+	h2 := args[9].Int32()
+
+	src_rect := sdl.Rect{X: x1, Y: y1, W: w1, H: h1}
+	dst_rect := sdl.Rect{X: x2, Y: y2, W: w2, H: h2}
+	SDL_Renderer.SetRenderTarget(LayerList[dst_handle].texture)
+	SDL_Renderer.Copy(LayerList[src_handle].texture, &src_rect, &dst_rect)
+
+	return ctx.Null()
+}
+
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_ES)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
@@ -230,6 +255,56 @@ func SDL_CreateRGBSurface(ctx *quickjs.Context, this quickjs.Value, args []quick
 	LayerList = append(LayerList, layer)
 
 	return ctx.Int32(int32(len(LayerList) - 1))
+}
+
+func SDL_DrawImage(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
+	handle := args[0].Int32()
+	src := args[1].String()
+	src_x := args[2].Int32()
+	src_y := args[3].Int32()
+	src_w := args[4].Int32()
+	src_h := args[5].Int32()
+	dst_x := args[6].Int32()
+	dst_y := args[7].Int32()
+	dst_w := args[8].Int32()
+	dst_h := args[9].Int32()
+	layer := LayerList[handle]
+	SDL_Renderer.SetRenderTarget(layer.texture)
+
+	s, err := img.Load(src)
+	if err != nil {
+		return ctx.Null()
+	}
+	t, err := SDL_Renderer.CreateTextureFromSurface(s)
+	if err != nil {
+		return ctx.Null()
+	}
+	SDL_Renderer.Copy(t, &sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}, &sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h})
+
+	return ctx.Null()
+}
+
+func IMG_Load(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	s, err := img.Load(args[0].String())
+	if err != nil {
+		return ctx.Null()
+	}
+	t, err := SDL_Renderer.CreateTextureFromSurface(s)
+	if err != nil {
+		return ctx.Null()
+	}
+	_, _, w, h, err := t.Query()
+	if err != nil {
+		return ctx.Null()
+	}
+	ret := ctx.Object()
+	ret.Set("w", ctx.Int32(w))
+	ret.Set("h", ctx.Int32(h))
+
+	return ret
 }
 
 var WavList []*mix.Chunk
@@ -339,6 +414,14 @@ func iniSDL(ctx *quickjs.Context) {
 	SDL.Set("FillRect", ctx.Function(SDL_FillRect))
 	SDL.Set("Triangle", ctx.Function(SDL_Triangle))
 	SDL.Set("FilledPolygonColor", ctx.Function(SDL_FilledPolygonColor))
+	SDL.Set("DrawImage", ctx.Function(SDL_DrawImage))
+	SDL.Set("Copy", ctx.Function(SDL_Copy))
+
+	// image
+	img.Init(img.INIT_JPG | img.INIT_PNG)
+	IMG := ctx.Object()
+	ctx.Globals().Set("IMG", IMG)
+	IMG.Set("Load", ctx.Function(IMG_Load))
 
 	// sound
 	mix.Init(mix.INIT_MP3 | mix.INIT_OGG)

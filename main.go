@@ -84,7 +84,6 @@ func requestAnimationFrame(ctx *quickjs.Context, this quickjs.Value, args []quic
 	result = strings.Split(result[0], " ")
 	result2 := strings.Split(args[0].String(), "\n")
 	re := regexp.MustCompile(`\(.+\)`)
-	fmt.Println("requestAnimationFrame " + result[1])
 	use_timestamp = re.MatchString(result2[0])
 	currentFunc = result[1]
 	return ctx.String("")
@@ -97,6 +96,112 @@ func cancelAnimationFrame(ctx *quickjs.Context, this quickjs.Value, args []quick
 func initAnimation(ctx *quickjs.Context) {
 	ctx.Globals().Set("requestAnimationFrame", ctx.Function(requestAnimationFrame))
 	ctx.Globals().Set("cancelAnimationFrame", ctx.Function(cancelAnimationFrame))
+}
+
+func remapKey(sdl2_sym sdl.Keycode) int {
+	m := map[sdl.Keycode]int{
+		sdl.K_BACKSPACE:    8,
+		sdl.K_RETURN:       13,
+		sdl.K_LSHIFT:       16,
+		sdl.K_RSHIFT:       16,
+		sdl.K_RCTRL:        17,
+		sdl.K_LCTRL:        17,
+		sdl.K_LALT:         18,
+		sdl.K_RALT:         18,
+		sdl.K_PAUSE:        19,
+		sdl.K_ESCAPE:       27,
+		sdl.K_SPACE:        32,
+		sdl.K_PAGEUP:       33,
+		sdl.K_PAGEDOWN:     34,
+		sdl.K_END:          35,
+		sdl.K_HOME:         36,
+		sdl.K_LEFT:         37,
+		sdl.K_UP:           38,
+		sdl.K_RIGHT:        39,
+		sdl.K_DOWN:         40,
+		sdl.K_INSERT:       45,
+		sdl.K_DELETE:       46,
+		sdl.K_0:            48,
+		sdl.K_1:            49,
+		sdl.K_2:            50,
+		sdl.K_3:            51,
+		sdl.K_4:            52,
+		sdl.K_5:            53,
+		sdl.K_6:            54,
+		sdl.K_7:            55,
+		sdl.K_8:            56,
+		sdl.K_9:            57,
+		sdl.K_COLON:        58,
+		sdl.K_SEMICOLON:    59,
+		sdl.K_AT:           64,
+		sdl.K_a:            65,
+		sdl.K_b:            66,
+		sdl.K_c:            67,
+		sdl.K_d:            68,
+		sdl.K_e:            69,
+		sdl.K_f:            70,
+		sdl.K_g:            71,
+		sdl.K_h:            72,
+		sdl.K_i:            73,
+		sdl.K_j:            74,
+		sdl.K_k:            75,
+		sdl.K_l:            76,
+		sdl.K_m:            77,
+		sdl.K_n:            78,
+		sdl.K_o:            79,
+		sdl.K_p:            80,
+		sdl.K_q:            81,
+		sdl.K_r:            82,
+		sdl.K_s:            83,
+		sdl.K_t:            84,
+		sdl.K_u:            85,
+		sdl.K_v:            86,
+		sdl.K_w:            87,
+		sdl.K_x:            88,
+		sdl.K_y:            89,
+		sdl.K_z:            90,
+		sdl.K_KP_0:         96,
+		sdl.K_KP_1:         97,
+		sdl.K_KP_2:         98,
+		sdl.K_KP_3:         99,
+		sdl.K_KP_4:         100,
+		sdl.K_KP_5:         101,
+		sdl.K_KP_6:         102,
+		sdl.K_KP_7:         103,
+		sdl.K_KP_8:         104,
+		sdl.K_KP_9:         105,
+		sdl.K_KP_MULTIPLY:  106,
+		sdl.K_KP_PLUS:      107,
+		sdl.K_KP_MINUS:     109,
+		sdl.K_KP_PERIOD:    110,
+		sdl.K_KP_DIVIDE:    111,
+		sdl.K_F1:           112,
+		sdl.K_F2:           113,
+		sdl.K_F3:           114,
+		sdl.K_F4:           115,
+		sdl.K_F5:           116,
+		sdl.K_F6:           117,
+		sdl.K_F7:           118,
+		sdl.K_F8:           119,
+		sdl.K_F9:           120,
+		sdl.K_F10:          121,
+		sdl.K_F11:          122,
+		sdl.K_F12:          123,
+		sdl.K_SCROLLLOCK:   145,
+		sdl.K_CARET:        160,
+		sdl.K_MINUS:        173,
+		sdl.K_COMMA:        188,
+		sdl.K_PERIOD:       190,
+		sdl.K_SLASH:        191,
+		sdl.K_LEFTBRACKET:  219,
+		sdl.K_BACKSLASH:    220,
+		sdl.K_RIGHTBRACKET: 221,
+	}
+	v, r := m[sdl2_sym]
+	if r {
+		return v
+	}
+	return 0
 }
 
 var currentFunc = ""
@@ -263,6 +368,12 @@ func main() {
 			case sdl.KeyboardEvent:
 				if t.Keysym.Sym == sdl.K_q {
 					running = false
+				} else if t.Type == sdl.KEYDOWN {
+					e := fmt.Sprintf("{ id: 'keydown',  which: %d}", remapKey(t.Keysym.Sym))
+					ctx.Eval("try { document.emit(" + e + ") } catch (error) {console.log(error); console.log(error.stack)}")
+				} else {
+					e := fmt.Sprintf("{ id: 'keyup',  which: %d}", remapKey(t.Keysym.Sym))
+					ctx.Eval("try { document.emit(" + e + ") } catch (error) {console.log(error); console.log(error.stack)}")
 				}
 			case sdl.QuitEvent:
 				println("Quit")
