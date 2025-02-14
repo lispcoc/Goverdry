@@ -155,14 +155,17 @@ func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []qui
 		return ctx.Null()
 	}
 	handle := args[0].Int32()
-	x := args[1].Int32()
-	y := args[2].Int32()
-	w := args[3].Int32()
-	h := args[4].Int32()
+	x1 := args[1].Int32()
+	y1 := args[2].Int32()
+	w1 := args[3].Int32()
+	h1 := args[4].Int32()
+	x2 := args[5].Int32()
+	y2 := args[6].Int32()
+	w2 := args[7].Int32()
+	h2 := args[8].Int32()
 	layer := LayerList[handle]
-	surface, _ := SDL_Window.GetSurface()
-	dst_rect := sdl.Rect{X: 0, Y: 0, W: surface.W, H: surface.H}
-	src_rect := sdl.Rect{X: x, Y: y, W: w, H: h}
+	src_rect := sdl.Rect{X: x1, Y: y1, W: w1, H: h1}
+	dst_rect := sdl.Rect{X: x2, Y: y2, W: w2, H: h2}
 
 	SDL_Renderer.SetRenderTarget(nil)
 	if err := SDL_Renderer.Copy(layer.texture, &src_rect, &dst_rect); err != nil {

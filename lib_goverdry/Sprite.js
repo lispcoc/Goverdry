@@ -9,6 +9,6 @@ class Sprite extends SceneNode {
     this.drawToWindow(this.width, this.height)
   }
   drawToWindow () {
-    SDL.DrawSpriteToWindow(this.image.handle, 0, 0, this.width, this.height)
+    SDL.DrawSpriteToWindow(this.image.handle, 0, 0, this.width, this.height, 0, 0, GameBody.width, GameBody.height)
   }
 }

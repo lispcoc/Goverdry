@@ -15,8 +15,10 @@ class SceneNode {
   }
   clone () {
     console.log(this.constructor.name, 'clone')
-    let r = JSON.parse(JSON.stringify(this))
-    r.childNodes = this.childNodes
+    var r = new SceneNode ()
+    Object.keys(this).forEach(k => {
+      r[k] = this[k]
+    })
     return r
   }
 }

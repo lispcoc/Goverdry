@@ -28,6 +28,9 @@ class Plane {
       [-1, -1, 0],
       [1, -1, 0]
     ]
+    this._scaleX = 1
+    this._scaleY = 1
+    this._scaleZ = 1
   }
   scale (x, y, z) {
     for (let i = 0; i < this.points.length; i++) {
@@ -35,6 +38,9 @@ class Plane {
       this.points[i][1] *= y
       this.points[i][2] *= z
     }
+    this._scaleX *= x
+    this._scaleY *= y
+    this._scaleZ *= z
   }
   rotateYaw (r) {
     console.log(JSON.stringify(this.points))
@@ -73,19 +79,27 @@ class Plane {
     console.log(JSON.stringify(this.points))
   }
   update (ctx) {
-    console.log(this.x, this.y, this.z)
+    console.log(this.type)
+    console.log(
+      this.x,
+      this.y,
+      this.z,
+      this._scaleX,
+      this._scaleY,
+      this._scaleZ
+    )
     // Line
     ctx.beginPath()
     for (let i = 0; i < this.points.length; i++) {
-      const z = this.z + this.points[i][2] + MP.CAMERA_Z
+      const z = this.z + this.points[i][2] / 2
       var x =
-        GameBody.width * 2 +
-        ((this.x + this.points[i][0]) * GameBody.width) / 2 / z
+        ((this.x + this.points[i][0] / 2) * MP.CENTER_FRAME_WIDTH) /
+        (2.4 - z)
       var y =
-        GameBody.height * 2 -
-        ((this.y + this.points[i][1]) * GameBody.width * 2) / z
-      x = x >= 0 ? x : 0
-      y = y >= 0 ? y : 0
+        ((this.y -0.2 + this.points[i][1] / 2) * MP.CENTER_FRAME_HEIGHT) /
+        (2.4 - z)
+      x += (GameBody.width * 3) / 2
+      y += (GameBody.height * 3) / 2
       if (i == 0) {
         ctx.moveTo(x, y)
       } else {
@@ -95,6 +109,9 @@ class Plane {
     ctx.closePath()
     ctx.fill()
     ctx.stroke()
+  }
+  visible () {
+    return this.mesh.texture.src != null
   }
 }
 
@@ -111,6 +128,7 @@ class PlaneXZ extends Plane {
       [-1, 0, -1],
       [1, 0, -1]
     ]
+    math.multiply(this.points, 0.5)
   }
 }
 
@@ -121,5 +139,7 @@ class PlaneMesh {
 }
 
 class PlaneTexture {
-  constructor () {}
+  constructor () {
+    this.src = null
+  }
 }
