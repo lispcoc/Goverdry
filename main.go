@@ -204,6 +204,43 @@ func remapKey(sdl2_sym sdl.Keycode) int {
 	return 0
 }
 
+var saving = false
+var savepost = false
+var savenum = 0
+
+func saveWorker(ctx *quickjs.Context) {
+	if saving {
+		println("saveWorker is busy.")
+		return
+	}
+	saving = true
+	for true {
+		if savepost {
+			println("save start.")
+			ret := ctx.Globals().Call("getSaveDataStr")
+			f, err := os.Create(fmt.Sprintf("savetest.%d.txt", savenum))
+			if err != nil {
+				println("something wrong.")
+				f.Close()
+				savepost = false
+				continue
+			}
+			f.WriteString(ret.String())
+			f.Sync()
+			f.Close()
+			savenum++
+			println("save succeed.")
+			savepost = false
+		}
+		sdl.Delay(1000)
+	}
+}
+
+func callSaveWorker(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	savepost = true
+	return ctx.Null()
+}
+
 var currentFunc = ""
 var use_timestamp = false
 
@@ -297,6 +334,9 @@ func main() {
 		}
 	}
 	ctx.Loop()
+
+	ctx.Globals().Set("callSaveWorker", ctx.Function(callSaveWorker))
+	go saveWorker(ctx)
 
 	// read test data
 	ctx.EvalFile("test_data/gameDataHTML5.js")
