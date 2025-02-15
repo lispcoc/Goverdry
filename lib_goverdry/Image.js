@@ -25,10 +25,10 @@ class ImageData {
 function loadImage () {
   for (var e of image_reminder) {
     if (!e.ready && e.onload) {
-      console.log("loadImage")
-      console.log(e.src)
+      console.log("loadImage", e.src)
       let ret = IMG.Load(e.src)
       if(ret == null){
+        console.log("load error.")
         e.onerror()
       } else {
         console.log("load success.")

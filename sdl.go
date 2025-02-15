@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 	"unsafe"
 
@@ -21,6 +22,7 @@ var window_ok = false
 var WINDOW_X int32
 var WINDOW_Y int32
 
+const USE_SOFTWARE_RENDER = true
 const FONT_SIZE = 14
 
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -265,7 +267,11 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	sdl.GLSetSwapInterval(1)
 	SDL_Window = window
 
-	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_TARGETTEXTURE)
+	flag := sdl.RENDERER_ACCELERATED | sdl.RENDERER_TARGETTEXTURE
+	if USE_SOFTWARE_RENDER {
+		flag = sdl.RENDERER_SOFTWARE | sdl.RENDERER_TARGETTEXTURE
+	}
+	SDL_Renderer, err = sdl.CreateRenderer(window, -1, flag)
 	if err != nil {
 		println(err.Error())
 		panic(err)
@@ -279,6 +285,9 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 
 	custom = sdl.ComposeCustomBlendMode(sdl.BLENDFACTOR_ONE, sdl.BLENDFACTOR_ZERO, sdl.BLENDOPERATION_ADD,
 		sdl.BLENDFACTOR_ONE, sdl.BLENDFACTOR_ONE, sdl.BLENDOPERATION_MINIMUM)
+
+	resetWindow()
+	applyWindow()
 
 	window_ok = true
 
@@ -335,16 +344,30 @@ func SDL_DrawImage(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Valu
 	layer := LayerList[handle]
 	SDL_Renderer.SetRenderTarget(layer.texture)
 
-	img, err := img.LoadTexture(SDL_Renderer, src)
-	if err != nil {
-		return ctx.Null()
+	var t *sdl.Texture
+	var err error
+	if USE_SOFTWARE_RENDER {
+		s, err := img.Load(src)
+		if err != nil {
+			return ctx.Null()
+		}
+		t, err = SDL_Renderer.CreateTextureFromSurface(s)
+		if err != nil {
+			return ctx.Null()
+		}
+		s.Free()
+	} else {
+		t, err = img.LoadTexture(SDL_Renderer, src)
+		if err != nil {
+			return ctx.Null()
+		}
 	}
-	img.SetBlendMode(sdl.BLENDMODE_BLEND)
-	SDL_Renderer.Copy(img, &sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}, &sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h})
-	img.Destroy()
+	t.SetBlendMode(sdl.BLENDMODE_BLEND)
+	SDL_Renderer.Copy(t, &sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}, &sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h})
+	t.Destroy()
 
 	//debug
-	//IMG_SaveFileInternal(handle, fmt.Sprintf("test_ori/%d.png", handle))
+	IMG_SaveFileInternal(handle, fmt.Sprintf("test_ori/%d.png", handle))
 
 	return ctx.Null()
 }
@@ -372,21 +395,30 @@ func IMG_SaveFile(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 }
 
 func IMG_Load(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-	s, err := img.Load(args[0].String())
-	if err != nil {
-		return ctx.Null()
-	}
-	t, err := SDL_Renderer.CreateTextureFromSurface(s)
-	if err != nil {
-		return ctx.Null()
-	}
-	_, _, w, h, err := t.Query()
-	if err != nil {
-		return ctx.Null()
-	}
 	ret := ctx.Object()
-	ret.Set("w", ctx.Int32(w))
-	ret.Set("h", ctx.Int32(h))
+	if USE_SOFTWARE_RENDER {
+		s, err := img.Load(args[0].String())
+		if err != nil {
+			return ctx.Null()
+		}
+		ret.Set("w", ctx.Int32(s.W))
+		ret.Set("h", ctx.Int32(s.H))
+		s.Free()
+	} else {
+		t, err := img.LoadTexture(SDL_Renderer, args[0].String())
+		if err != nil {
+			println(err.Error())
+			return ctx.Null()
+		}
+		_, _, w, h, err := t.Query()
+		if err != nil {
+			return ctx.Null()
+		}
+		ret.Set("w", ctx.Int32(w))
+		ret.Set("h", ctx.Int32(h))
+		t.Destroy()
+
+	}
 
 	return ret
 }
@@ -448,15 +480,9 @@ func musicFinished() {
 }
 
 func resetWindow() {
-	t, _ := SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, WINDOW_X, WINDOW_Y)
-	t.SetBlendMode(sdl.BLENDMODE_NONE)
-
-	rect := sdl.Rect{X: 0, Y: 0, W: WINDOW_X, H: WINDOW_Y}
 	SDL_Renderer.SetRenderTarget(nil)
-	if err := SDL_Renderer.Copy(t, &rect, &rect); err != nil {
-		panic(err)
-	}
-	t.Destroy()
+	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
+	SDL_Renderer.Clear()
 }
 
 func applyWindow() {

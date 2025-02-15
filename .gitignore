@@ -1,9 +1,10 @@
 /.vscode/
 /graphic/
+/graphic2/
 /music/
 /sound/
 /save/JavardrySave
 /save/JavardryConfig
 /Goverdry
-out.txt
+/*.txt
 *.exe

@@ -137,7 +137,6 @@ class SurfaceContext {
     SDL.FilledPolygonColor(this.handle, vx, vy, color.r, color.g, color.b)
   }
   fillTexture (img_handle, img_w, img_h, x, y, w = 0, h = 0) {
-    console.log(this.constructor.name, 'fillTexture', this.handle, img_handle)
     var vx = this.points.map(e => e.x)
     var vy = this.points.map(e => e.y)
 
