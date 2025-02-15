@@ -79,36 +79,53 @@ class Plane {
     console.log(JSON.stringify(this.points))
   }
   update (ctx) {
-    console.log(this.type)
-    console.log(
-      this.x,
-      this.y,
-      this.z,
-      this._scaleX,
-      this._scaleY,
-      this._scaleZ
-    )
-    // Line
+    const offsetX = (GameBody.width * 3) / 2
+    const offsetY = (GameBody.height * 3) / 2
     ctx.beginPath()
+    var minX = -1,
+      maxX = -1,
+      minY = -1,
+      maxY = -1
     for (let i = 0; i < this.points.length; i++) {
       const z = this.z + this.points[i][2] / 2
       var x =
-        ((this.x + this.points[i][0] / 2) * MP.CENTER_FRAME_WIDTH) /
-        (2.4 - z)
+        ((this.x + this.points[i][0] / 2) * MP.CENTER_FRAME_WIDTH) / (2.4 - z)
       var y =
-        ((this.y -0.2 + this.points[i][1] / 2) * MP.CENTER_FRAME_HEIGHT) /
+        ((this.y - 0.2 + this.points[i][1] / 2) * MP.CENTER_FRAME_HEIGHT) /
         (2.4 - z)
-      x += (GameBody.width * 3) / 2
-      y += (GameBody.height * 3) / 2
+      x += offsetX
+      y += offsetY
       if (i == 0) {
         ctx.moveTo(x, y)
       } else {
         ctx.lineTo(x, y)
       }
+
+      if (minX < 0) {
+        minX = x
+      }
+      if (minY < 0) {
+        minY = y
+      }
+      minX = Math.min(minX, x)
+      minY = Math.min(minY, y)
+      maxX = Math.max(maxX, x)
+      maxY = Math.max(maxY, y)
     }
     ctx.closePath()
-    ctx.fill()
-    ctx.stroke()
+    
+    ctx.fillTexture(
+      this.mesh.texture.src.handle,
+      this.mesh.texture.src.width,
+      this.mesh.texture.src.height,
+      minX,
+      minY,
+      maxX - minX,
+      maxY - minY
+    )
+    // debug
+    // ctx.fillStyle ="black"
+    // ctx.fillText("" + this.mesh.texture.src.handle, (minX + maxX) / 2, (minY + maxY) / 2)
   }
   visible () {
     return this.mesh.texture.src != null

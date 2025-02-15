@@ -1,38 +1,41 @@
 class Surface extends SceneNode {
   constructor (width, height) {
     super()
-    console.log(this.constructor.name, 'constructor')
     this.width = width
     this.height = height
     this.fillStyle = '#ffffff'
     this.handle = SDL.CreateRGBSurface(width, height)
+    console.log(
+      this.constructor.name,
+      'constructor',
+      this.handle,
+      width,
+      height
+    )
     this.context = new SurfaceContext(this.handle)
     this._element = { src: 0 }
   }
   clone () {
-    var r = new Surface ()
+    console.log(this.constructor.name, 'clone', this.handle)
+    var r = new Surface(this.width, this.height)
+    var bkup = r.handle
+    var bkup2 = r.context
     Object.keys(this).forEach(k => {
       r[k] = this[k]
     })
+    r.handle = bkup
+    r.context = bkup2
+    r.draw(this, 0, 0, this.width, this.height, 0, 0, this.width, this.height)
+    // debug
+    //IMG.SaveFile(this.handle, "test/" + this.handle + ".png")
+    //IMG.SaveFile(r.handle, "test/" + r.handle + ".png")
     return r
   }
   clear () {
     SDL.LayerClear(this.handle)
   }
   draw (src_surface, x1, y1, w1, h1, x2, y2, w2, h2) {
-    console.log(
-      this.constructor.name,
-      'draw',
-      src_surface.handle,
-      x1,
-      y1,
-      w1,
-      h1,
-      x2,
-      y2,
-      w2,
-      h2
-    )
+    console.log(this.constructor.name, 'draw', this.handle, src_surface.handle)
     SDL.Copy(src_surface.handle, this.handle, x1, y1, w1, h1, x2, y2, w2, h2)
   }
 }
@@ -133,6 +136,29 @@ class SurfaceContext {
     var vy = this.points.map(e => e.y)
     SDL.FilledPolygonColor(this.handle, vx, vy, color.r, color.g, color.b)
   }
+  fillTexture (img_handle, img_w, img_h, x, y, w = 0, h = 0) {
+    console.log(this.constructor.name, 'fillTexture', this.handle, img_handle)
+    var vx = this.points.map(e => e.x)
+    var vy = this.points.map(e => e.y)
+
+    SDL.FilledPolygonImage(
+      this.handle,
+      img_handle,
+      0,
+      0,
+      img_w,
+      img_h,
+      x,
+      y,
+      w ? w : img_w,
+      h ? h : img_h,
+      vx,
+      vy,
+      255,
+      255,
+      255
+    )
+  }
   stroke () {
     var color = toRGB(this.strokeStyle)
     SDL.DrawLine(this.handle, this.lines, color.r, color.g, color.b)
@@ -145,7 +171,7 @@ class SurfaceContext {
     var color = toRGB(this.fillStyle)
     SDL.FillText(this.handle, Text, x, y, color.r, color.g, color.b)
   }
-  drawImage (img, x, y) {
+  drawImage (img, x, y, w = 0, h = 0) {
     SDL.DrawImage(
       this.handle,
       img.src,
@@ -155,8 +181,8 @@ class SurfaceContext {
       img.height,
       x,
       y,
-      img.width,
-      img.height
+      w ? w : img.width,
+      h ? h : img.height
     )
   }
 }

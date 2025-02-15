@@ -2,6 +2,7 @@ package main
 
 import (
 	"time"
+	"unsafe"
 
 	"github.com/buke/quickjs-go"
 	"github.com/veandco/go-sdl2/gfx"
@@ -14,6 +15,7 @@ import (
 var SDL_Font *ttf.Font
 var SDL_Renderer *sdl.Renderer
 var SDL_Window *sdl.Window
+var workspace *sdl.Texture
 var window_ok = false
 
 const FONT_SIZE = 14
@@ -87,6 +89,50 @@ func SDL_FilledPolygonColor(ctx *quickjs.Context, this quickjs.Value, args []qui
 	gfx.FilledPolygonColor(SDL_Renderer, vx, vy, color)
 
 	return ctx.String("")
+}
+
+func SDL_FilledPolygonImage(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	if !window_ok {
+		return ctx.String("")
+	}
+	handle := args[0].Int32()
+	img_handle := args[1].Int32()
+	src_x := args[2].Int32()
+	src_y := args[3].Int32()
+	src_w := args[4].Int32()
+	src_h := args[5].Int32()
+	dst_x := args[6].Int32()
+	dst_y := args[7].Int32()
+	dst_w := args[8].Int32()
+	dst_h := args[9].Int32()
+	var vx []int16
+	var vy []int16
+	for i := 0; i < int(args[10].ToArray().Len()); i++ {
+		v, _ := args[10].ToArray().Get(int64(i))
+		vx = append(vx, int16(v.Int32()))
+	}
+	for i := 0; i < int(args[11].ToArray().Len()); i++ {
+		v, _ := args[11].ToArray().Get(int64(i))
+		vy = append(vy, int16(v.Int32()))
+	}
+	SDL_Renderer.SetRenderTarget(workspace)
+	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
+	SDL_Renderer.Clear()
+	color := sdl.Color{R: uint8(args[12].Uint32()), G: uint8(args[13].Uint32()), B: uint8(args[14].Uint32()), A: 255}
+	gfx.FilledPolygonColor(SDL_Renderer, vx, vy, color)
+
+	src := sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}
+	dst := sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h}
+	img := LayerList[img_handle].texture
+	img.SetBlendMode(sdl.BLENDMODE_MUL)
+	SDL_Renderer.Copy(img, &src, &dst)
+
+	layer := LayerList[handle]
+	SDL_Renderer.SetRenderTarget(layer.texture)
+	workspace.SetBlendMode(sdl.BLENDMODE_BLEND)
+	SDL_Renderer.Copy(workspace, &dst, &dst)
+
+	return ctx.Null()
 }
 
 func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -226,6 +272,12 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	}
 	surface.FillRect(nil, 0)
 
+	workspace, err = SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, surface.W*4, surface.H*4)
+	if err != nil {
+		println(err.Error())
+		panic(err)
+	}
+
 	window_ok = true
 
 	ttf.Init()
@@ -281,15 +333,38 @@ func SDL_DrawImage(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Valu
 	layer := LayerList[handle]
 	SDL_Renderer.SetRenderTarget(layer.texture)
 
-	s, err := img.Load(src)
+	img, err := img.LoadTexture(SDL_Renderer, src)
 	if err != nil {
 		return ctx.Null()
 	}
-	t, err := SDL_Renderer.CreateTextureFromSurface(s)
-	if err != nil {
-		return ctx.Null()
-	}
-	SDL_Renderer.Copy(t, &sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}, &sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h})
+	img.SetBlendMode(sdl.BLENDMODE_BLEND)
+	SDL_Renderer.Copy(img, &sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}, &sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h})
+	img.Destroy()
+
+	//debug
+	//IMG_SaveFileInternal(handle, fmt.Sprintf("test_ori/%d.png", handle))
+
+	return ctx.Null()
+}
+
+func IMG_SaveFileInternal(handle int32, file string) {
+	layer := LayerList[handle]
+	SDL_Renderer.SetRenderTarget(layer.texture)
+
+	t := SDL_Renderer.GetRenderTarget()
+	SDL_Renderer.SetRenderTarget(t)
+	_, _, w, h, _ := t.Query()
+	s, _ := sdl.CreateRGBSurface(0, w, h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF)
+
+	SDL_Renderer.ReadPixels(nil, s.Format.Format, unsafe.Pointer(&s.Pixels()[0]), int(s.Pitch))
+	img.SavePNG(s, file)
+	s.Free()
+}
+
+func IMG_SaveFile(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	handle := args[0].Int32()
+	file := args[1].String()
+	IMG_SaveFileInternal(handle, file)
 
 	return ctx.Null()
 }
@@ -421,6 +496,7 @@ func iniSDL(ctx *quickjs.Context) {
 	SDL.Set("FillRect", ctx.Function(SDL_FillRect))
 	SDL.Set("Triangle", ctx.Function(SDL_Triangle))
 	SDL.Set("FilledPolygonColor", ctx.Function(SDL_FilledPolygonColor))
+	SDL.Set("FilledPolygonImage", ctx.Function(SDL_FilledPolygonImage))
 	SDL.Set("DrawImage", ctx.Function(SDL_DrawImage))
 	SDL.Set("Copy", ctx.Function(SDL_Copy))
 
@@ -429,6 +505,7 @@ func iniSDL(ctx *quickjs.Context) {
 	IMG := ctx.Object()
 	ctx.Globals().Set("IMG", IMG)
 	IMG.Set("Load", ctx.Function(IMG_Load))
+	IMG.Set("SaveFile", ctx.Function(IMG_SaveFile))
 
 	// sound
 	mix.Init(mix.INIT_MP3 | mix.INIT_OGG)

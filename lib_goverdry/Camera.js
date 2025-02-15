@@ -28,8 +28,6 @@ class Camera {
         GameBody.height * 3
       )
       this.context = new SurfaceContext(this.handle)
-      this.context.fillStyle = '#00ff00'
-      this.context.strokeStyle = '#ffffff'
     } else {
       console.log(this.handle)
 
