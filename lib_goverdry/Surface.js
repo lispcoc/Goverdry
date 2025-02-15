@@ -115,9 +115,9 @@ class SurfaceContext {
     console.log(this.constructor.name, 'arcTo', x1, y1, x2, y2, radius)
     console.log('[Todo]arc is wip.')
     this.lines.push({ x1: this.x, y1: this.y, x2: x1, y2: y1 })
-    this.x = x
-    this.y = y
-    this.points.push({ x: x, y: y })
+    this.x = x2
+    this.y = y2
+    this.points.push({ x: x2, y: y2 })
   }
   closePath () {
     if (this.lines.length) {
