@@ -18,6 +18,8 @@ var SDL_Window *sdl.Window
 var workspace *sdl.Texture
 var custom sdl.BlendMode
 var window_ok = false
+var WINDOW_X int32
+var WINDOW_Y int32
 
 const FONT_SIZE = 14
 
@@ -247,12 +249,15 @@ func SDL_Copy(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) qu
 }
 
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	sdl.SetHint(sdl.HINT_RENDER_DRIVER, "opengles2")
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_ES)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 0)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
 	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+	WINDOW_X = args[0].Int32()
+	WINDOW_Y = args[1].Int32()
 
-	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, args[0].Int32(), args[1].Int32(), sdl.WINDOW_OPENGL|sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, WINDOW_X, WINDOW_Y, sdl.WINDOW_OPENGL|sdl.WINDOW_SHOWN)
 	if err != nil {
 		println(err.Error())
 		panic(err)
@@ -266,14 +271,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 		panic(err)
 	}
 
-	surface, err := window.GetSurface()
-	if err != nil {
-		println(err.Error())
-		panic(err)
-	}
-	surface.FillRect(nil, 0)
-
-	workspace, err = SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, surface.W*4, surface.H*4)
+	workspace, err = SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, WINDOW_X*4, WINDOW_Y*4)
 	if err != nil {
 		println(err.Error())
 		panic(err)
@@ -450,11 +448,10 @@ func musicFinished() {
 }
 
 func resetWindow() {
-	surface, _ := SDL_Window.GetSurface()
-	t, _ := SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, surface.W, surface.H)
+	t, _ := SDL_Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, WINDOW_X, WINDOW_Y)
 	t.SetBlendMode(sdl.BLENDMODE_NONE)
 
-	rect := sdl.Rect{X: 0, Y: 0, W: surface.W, H: surface.H}
+	rect := sdl.Rect{X: 0, Y: 0, W: WINDOW_X, H: WINDOW_Y}
 	SDL_Renderer.SetRenderTarget(nil)
 	if err := SDL_Renderer.Copy(t, &rect, &rect); err != nil {
 		panic(err)
