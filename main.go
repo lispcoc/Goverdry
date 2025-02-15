@@ -298,6 +298,19 @@ func main() {
 	}
 	ctx.Loop()
 
+	files, _ = os.ReadDir("js_goverdry")
+	for _, f := range files {
+		if slices.Contains(pre_files, f.Name()) {
+			continue
+		}
+		println(f.Name())
+		_, err := ctx.EvalFile("js_goverdry/" + f.Name())
+		if err != nil {
+			panic(err)
+		}
+	}
+	ctx.Loop()
+
 	// read test data
 	ctx.EvalFile("test_data/gameDataHTML5.js")
 	ctx.EvalFile("test_data/defaultMessage_jpn.js")
@@ -317,6 +330,7 @@ func main() {
 	running := true
 	s := time.Now()
 	fps := 0
+	pre_fps := 0
 	chktime := time.Now()
 	frametime := time.Now()
 	for running {
@@ -358,6 +372,7 @@ func main() {
 			println(err.Error())
 			break
 		}
+		showFps(pre_fps)
 		applyWindow()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -392,6 +407,7 @@ func main() {
 		fps++
 		if time.Since(chktime).Milliseconds() >= 1000 {
 			fmt.Printf("fps: %d\n", fps)
+			pre_fps = fps
 			fps = 0
 			chktime = time.Now()
 		}

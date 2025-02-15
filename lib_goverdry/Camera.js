@@ -19,6 +19,7 @@ class Camera {
         }
       }
     }
+    OVERLAY.update()
   }
   update3D () {
     // 3D (test)

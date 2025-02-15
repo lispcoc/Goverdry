@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 	"unsafe"
 
@@ -23,7 +22,7 @@ var WINDOW_X int32
 var WINDOW_Y int32
 
 const USE_SOFTWARE_RENDER = false
-const FONT_SIZE = 14
+const FONT_SIZE = 12
 
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	if !window_ok {
@@ -297,7 +296,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	window_ok = true
 
 	ttf.Init()
-	SDL_Font, err = ttf.OpenFont("HackGen35Console-Bold.ttf", FONT_SIZE)
+	SDL_Font, err = ttf.OpenFont("JF-Dot-MPlus12.ttf", FONT_SIZE)
 	if err != nil {
 		println(err.Error())
 		panic(err)
@@ -371,9 +370,11 @@ func SDL_DrawImage(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Valu
 	SDL_Renderer.Copy(t, &sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}, &sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h})
 	t.Destroy()
 
-	//debug
-	IMG_SaveFileInternal(handle, fmt.Sprintf("test_ori/%d.png", handle))
+	return ctx.Null()
+}
 
+func SDL_ApplyWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	applyWindow()
 	return ctx.Null()
 }
 
@@ -408,7 +409,6 @@ func IMG_Load(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) qu
 		}
 		ret.Set("w", ctx.Int32(s.W))
 		ret.Set("h", ctx.Int32(s.H))
-		//img.SavePNG(s, fmt.Sprintf("test_ori/%d.png", iimgn))
 		iimgn++
 		s.Free()
 	} else {
@@ -533,6 +533,7 @@ func iniSDL(ctx *quickjs.Context) {
 	SDL.Set("FilledPolygonImage", ctx.Function(SDL_FilledPolygonImage))
 	SDL.Set("DrawImage", ctx.Function(SDL_DrawImage))
 	SDL.Set("Copy", ctx.Function(SDL_Copy))
+	SDL.Set("ApplyWindow", ctx.Function(SDL_ApplyWindow))
 
 	// image
 	img.Init(img.INIT_JPG | img.INIT_PNG)
