@@ -22,7 +22,7 @@ var window_ok = false
 var WINDOW_X int32
 var WINDOW_Y int32
 
-const USE_SOFTWARE_RENDER = true
+const USE_SOFTWARE_RENDER = false
 const FONT_SIZE = 14
 
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -251,11 +251,16 @@ func SDL_Copy(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) qu
 }
 
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-	sdl.SetHint(sdl.HINT_RENDER_DRIVER, "opengles2")
+	sdl.SetHint(sdl.HINT_EVENT_LOGGING, "2")
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_ES)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
 	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+	sdl.GLSetAttribute(sdl.GL_RED_SIZE, 8)
+	sdl.GLSetAttribute(sdl.GL_GREEN_SIZE, 8)
+	sdl.GLSetAttribute(sdl.GL_BLUE_SIZE, 8)
+	sdl.GLSetAttribute(sdl.GL_ALPHA_SIZE, 8)
+	sdl.GLSetAttribute(sdl.GL_DEPTH_SIZE, 24)
 	WINDOW_X = args[0].Int32()
 	WINDOW_Y = args[1].Int32()
 
@@ -376,9 +381,7 @@ func IMG_SaveFileInternal(handle int32, file string) {
 	layer := LayerList[handle]
 	SDL_Renderer.SetRenderTarget(layer.texture)
 
-	t := SDL_Renderer.GetRenderTarget()
-	SDL_Renderer.SetRenderTarget(t)
-	_, _, w, h, _ := t.Query()
+	_, _, w, h, _ := layer.texture.Query()
 	s, _ := sdl.CreateRGBSurface(0, w, h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF)
 
 	SDL_Renderer.ReadPixels(nil, s.Format.Format, unsafe.Pointer(&s.Pixels()[0]), int(s.Pitch))
@@ -394,6 +397,8 @@ func IMG_SaveFile(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	return ctx.Null()
 }
 
+var iimgn = 0
+
 func IMG_Load(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	ret := ctx.Object()
 	if USE_SOFTWARE_RENDER {
@@ -403,6 +408,8 @@ func IMG_Load(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) qu
 		}
 		ret.Set("w", ctx.Int32(s.W))
 		ret.Set("h", ctx.Int32(s.H))
+		//img.SavePNG(s, fmt.Sprintf("test_ori/%d.png", iimgn))
+		iimgn++
 		s.Free()
 	} else {
 		t, err := img.LoadTexture(SDL_Renderer, args[0].String())
