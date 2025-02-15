@@ -16,6 +16,7 @@ var SDL_Font *ttf.Font
 var SDL_Renderer *sdl.Renderer
 var SDL_Window *sdl.Window
 var workspace *sdl.Texture
+var custom sdl.BlendMode
 var window_ok = false
 
 const FONT_SIZE = 14
@@ -124,7 +125,7 @@ func SDL_FilledPolygonImage(ctx *quickjs.Context, this quickjs.Value, args []qui
 	src := sdl.Rect{X: src_x, Y: src_y, W: src_w, H: src_h}
 	dst := sdl.Rect{X: dst_x, Y: dst_y, W: dst_w, H: dst_h}
 	img := LayerList[img_handle].texture
-	img.SetBlendMode(sdl.BLENDMODE_MUL)
+	img.SetBlendMode(custom)
 	SDL_Renderer.Copy(img, &src, &dst)
 
 	layer := LayerList[handle]
@@ -259,7 +260,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	sdl.GLSetSwapInterval(1)
 	SDL_Window = window
 
-	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
+	SDL_Renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_TARGETTEXTURE)
 	if err != nil {
 		println(err.Error())
 		panic(err)
@@ -277,6 +278,9 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 		println(err.Error())
 		panic(err)
 	}
+
+	custom = sdl.ComposeCustomBlendMode(sdl.BLENDFACTOR_ONE, sdl.BLENDFACTOR_ZERO, sdl.BLENDOPERATION_ADD,
+		sdl.BLENDFACTOR_ONE, sdl.BLENDFACTOR_ONE, sdl.BLENDOPERATION_MINIMUM)
 
 	window_ok = true
 

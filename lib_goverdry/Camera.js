@@ -29,8 +29,6 @@ class Camera {
       )
       this.context = new SurfaceContext(this.handle)
     } else {
-      console.log(this.handle)
-
       this.clear()
       MP.Sprite3D.childNodes.sort((a, b) => {
         if (a.z < b.z) {

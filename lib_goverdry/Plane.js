@@ -124,8 +124,8 @@ class Plane {
       maxY - minY
     )
     // debug
-    // ctx.fillStyle ="black"
-    // ctx.fillText("" + this.mesh.texture.src.handle, (minX + maxX) / 2, (minY + maxY) / 2)
+     ctx.fillStyle ="black"
+     ctx.fillText("" + this.mesh.texture.src.handle, (minX + maxX) / 2, (minY + maxY) / 2)
   }
   visible () {
     return this.mesh.texture.src != null
@@ -145,7 +145,6 @@ class PlaneXZ extends Plane {
       [-1, 0, -1],
       [1, 0, -1]
     ]
-    math.multiply(this.points, 0.5)
   }
 }
 
