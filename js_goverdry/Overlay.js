@@ -11,6 +11,7 @@ class Overlay {
     this.update ()
     this._surface.context.fillStyle = "white"
     this._surface.context.fillText(text, GameBody.width * xp, GameBody.height * yp)
+    this.update ()
     SDL.ApplyWindow()
   }
   clearMessage () {
