@@ -50,7 +50,11 @@ class Plane {
       [Math.sin(r), 0, Math.cos(r)]
     ]
     for (let i = 0; i < this.points.length; i++) {
-      this.points[i] = math.multiply(rotator, this.points[i])
+      this.points[i] = [
+        rotator[0][0] * this.points[i][0] + rotator[0][1] * this.points[i][1] + rotator[0][2] * this.points[i][2],
+        rotator[1][0] * this.points[i][0] + rotator[1][1] * this.points[i][1] + rotator[1][2] * this.points[i][2],
+        rotator[2][0] * this.points[i][0] + rotator[2][1] * this.points[i][1] + rotator[2][2] * this.points[i][2],
+      ]
     }
     console.log(JSON.stringify(this.points))
   }
@@ -62,7 +66,11 @@ class Plane {
       [0, -Math.sin(r), Math.cos(r)]
     ]
     for (let i = 0; i < this.points.length; i++) {
-      this.points[i] = math.multiply(rotator, this.points[i])
+      this.points[i] = [
+        rotator[0][0] * this.points[i][0] + rotator[0][1] * this.points[i][1] + rotator[0][2] * this.points[i][2],
+        rotator[1][0] * this.points[i][0] + rotator[1][1] * this.points[i][1] + rotator[1][2] * this.points[i][2],
+        rotator[2][0] * this.points[i][0] + rotator[2][1] * this.points[i][1] + rotator[2][2] * this.points[i][2],
+      ]
     }
     console.log(JSON.stringify(this.points))
   }
@@ -74,7 +82,11 @@ class Plane {
       [0, 0, 1]
     ]
     for (let i = 0; i < this.points.length; i++) {
-      this.points[i] = math.multiply(rotator, this.points[i])
+      this.points[i] = [
+        rotator[0][0] * this.points[i][0] + rotator[0][1] * this.points[i][1] + rotator[0][2] * this.points[i][2],
+        rotator[1][0] * this.points[i][0] + rotator[1][1] * this.points[i][1] + rotator[1][2] * this.points[i][2],
+        rotator[2][0] * this.points[i][0] + rotator[2][1] * this.points[i][1] + rotator[2][2] * this.points[i][2],
+      ]
     }
     console.log(JSON.stringify(this.points))
   }

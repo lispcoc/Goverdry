@@ -76,17 +76,6 @@ class SurfaceContext {
     this.points.push({ x: x, y: y })
   }
   arc (x, y, radius, startAngle, endAngle, counterclockwise = false) {
-    console.log(
-      this.constructor.name,
-      'arc',
-      x,
-      y,
-      radius,
-      startAngle,
-      endAngle,
-      counterclockwise
-    )
-    console.log('[Todo]arc is wip.')
     if (!counterclockwise) {
       const x1 = x + radius * Math.cos(startAngle)
       const y1 = y - radius * Math.sin(startAngle)
@@ -112,8 +101,6 @@ class SurfaceContext {
     }
   }
   arcTo (x1, y1, x2, y2, radius) {
-    console.log(this.constructor.name, 'arcTo', x1, y1, x2, y2, radius)
-    console.log('[Todo]arc is wip.')
     this.lines.push({ x1: this.x, y1: this.y, x2: x1, y2: y1 })
     this.x = x2
     this.y = y2
