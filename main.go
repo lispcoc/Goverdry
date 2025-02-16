@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -102,6 +103,19 @@ var currentFunc = ""
 var use_timestamp = false
 
 func main() {
+	switch runtime.GOOS {
+	case "windows":
+		fmt.Println("running on Windows.")
+		USE_SOFTWARE_RENDER = true
+	case "darwing":
+		fmt.Println("running on Mac OSX.")
+	case "linux":
+		fmt.Println("running on Linux.")
+	case "freebsd":
+		fmt.Println("running on BSD.")
+	default:
+		fmt.Println("running on Other OS.")
+	}
 	headless := false
 	for _, v := range os.Args {
 		if v == "--headless" {

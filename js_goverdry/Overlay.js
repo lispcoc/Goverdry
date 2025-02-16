@@ -7,7 +7,6 @@ class Overlay {
     this._surface = null
   }
   setMessage (text, xp, yp) {
-    console.log(this.constructor.name, "setMessage")
     this.update ()
     this._surface.context.fillStyle = "white"
     this._surface.context.fillText(text, GameBody.width * xp, GameBody.height * yp)
@@ -15,7 +14,6 @@ class Overlay {
     SDL.ApplyWindow()
   }
   clearMessage () {
-    console.log(this.constructor.name, "clearMessage")
     this._surface.clear()
   }
   update () {

@@ -20,8 +20,8 @@ var custom sdl.BlendMode
 var window_ok = false
 var WINDOW_X int32
 var WINDOW_Y int32
+var USE_SOFTWARE_RENDER = false
 
-const USE_SOFTWARE_RENDER = false
 const FONT_SIZE = 12
 
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -250,15 +250,17 @@ func SDL_Copy(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) qu
 }
 
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_ES)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
-	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
-	sdl.GLSetAttribute(sdl.GL_RED_SIZE, 8)
-	sdl.GLSetAttribute(sdl.GL_GREEN_SIZE, 8)
-	sdl.GLSetAttribute(sdl.GL_BLUE_SIZE, 8)
-	sdl.GLSetAttribute(sdl.GL_ALPHA_SIZE, 8)
-	sdl.GLSetAttribute(sdl.GL_DEPTH_SIZE, 24)
+	if !USE_SOFTWARE_RENDER {
+		sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_ES)
+		sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+		sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
+		sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+		sdl.GLSetAttribute(sdl.GL_RED_SIZE, 8)
+		sdl.GLSetAttribute(sdl.GL_GREEN_SIZE, 8)
+		sdl.GLSetAttribute(sdl.GL_BLUE_SIZE, 8)
+		sdl.GLSetAttribute(sdl.GL_ALPHA_SIZE, 8)
+		sdl.GLSetAttribute(sdl.GL_DEPTH_SIZE, 24)
+	}
 	WINDOW_X = args[0].Int32()
 	WINDOW_Y = args[1].Int32()
 
