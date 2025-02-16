@@ -250,7 +250,6 @@ func SDL_Copy(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) qu
 }
 
 func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
-	sdl.SetHint(sdl.HINT_EVENT_LOGGING, "2")
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_ES)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
