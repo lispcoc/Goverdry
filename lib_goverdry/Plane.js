@@ -136,8 +136,8 @@ class Plane {
       maxY - minY
     )
     // debug
-     ctx.fillStyle ="black"
-     ctx.fillText("" + this.mesh.texture.src.handle, (minX + maxX) / 2, (minY + maxY) / 2)
+    // ctx.fillStyle ="black"
+    // ctx.fillText("" + this.mesh.texture.src.handle, (minX + maxX) / 2, (minY + maxY) / 2)
   }
   visible () {
     return this.mesh.texture.src != null
