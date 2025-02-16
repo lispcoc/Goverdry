@@ -182,6 +182,7 @@ func getSaveDataStr(json_str string) string {
 	} else if num > 9999 {
 		num = 9999
 	}
+	num++
 	var i, j, k, l int
 	for i = 0; i < num; i++ {
 		if i < len(PlayData.GameFlag) && PlayData.GameFlag[i] {
