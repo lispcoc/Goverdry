@@ -143,17 +143,7 @@ func main() {
 	initDocument(ctx)
 	initAnimation(ctx)
 	initIO(ctx)
-
-	// Create a new runtime
-	SaveRuntime := quickjs.NewRuntime(
-		quickjs.WithExecuteTimeout(3000),
-		quickjs.WithMemoryLimit(128*1024*1024),
-		quickjs.WithGCThreshold(128*1024*1024),
-		quickjs.WithMaxStackSize(65534*1024),
-		quickjs.WithCanBlock(true),
-	)
-	defer SaveRuntime.Close()
-	initSaveWorker(SaveRuntime, ctx)
+	initSave(ctx)
 
 	if headless {
 		iniDummySDL(ctx)
@@ -293,11 +283,6 @@ func main() {
 			break
 		}
 		showFps(pre_fps)
-		if Saving {
-			ctx.Globals().Get("OVERLAY").Call("setMessage", ctx.String("Saving..."), ctx.Float64(0.8), ctx.Float64(0.03))
-		} else {
-			ctx.Globals().Get("OVERLAY").Call("clearMessage", ctx.String("Saving..."), ctx.Float64(0.8), ctx.Float64(0.03))
-		}
 		applyWindow()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
