@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL := run
 
-SRCS := $(wildcard ./*.go)
+SRCS := $(wildcard ./src/*.go)
 ifeq ($(OS),Windows_NT)
 	OUTPUT := Goverdry.exe
 else
