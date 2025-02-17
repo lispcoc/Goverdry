@@ -146,7 +146,7 @@ func main() {
 	initSave(ctx)
 
 	if headless {
-		iniDummySDL(ctx)
+		initSDLHeadless(ctx)
 	} else {
 		var v sdl.Version
 		sdl.VERSION(&v)
@@ -165,7 +165,7 @@ func main() {
 			}
 		}
 
-		iniSDL(ctx)
+		initSDL(ctx)
 	}
 
 	files, _ := os.ReadDir("lib_goverdry")
