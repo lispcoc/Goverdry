@@ -1,6 +1,6 @@
 module main.go
 
-go 1.23.6
+go 1.23.4
 
 require (
 	github.com/buke/quickjs-go v0.4.15
