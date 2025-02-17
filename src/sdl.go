@@ -521,12 +521,19 @@ func DummyFunction(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Valu
 	return ctx.Int32(0)
 }
 
-func iniDummySDL(ctx *quickjs.Context) {
+func IMG_LoadDummy(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	ret := ctx.Object()
+	ret.Set("w", ctx.Int32(1))
+	ret.Set("h", ctx.Int32(1))
+	return ret
+}
+
+func initSDLHeadless(ctx *quickjs.Context) {
 	SDL := ctx.Object()
 	ctx.Globals().Set("SDL", SDL)
 	SDL.Set("ApplyWindow", ctx.Function(DummyFunction))
 	SDL.Set("Copy", ctx.Function(DummyFunction))
-	SDL.Set("CreateRGBSurface", ctx.Function(DummyFunction))
+	SDL.Set("CreateRGBSurface", ctx.Function(SDL_CreateRGBSurface))
 	SDL.Set("CreateWindow", ctx.Function(DummyFunction))
 	SDL.Set("DrawImage", ctx.Function(DummyFunction))
 	SDL.Set("DrawLine", ctx.Function(DummyFunction))
@@ -544,9 +551,15 @@ func iniDummySDL(ctx *quickjs.Context) {
 	img.Init(img.INIT_JPG | img.INIT_PNG)
 	IMG := ctx.Object()
 	ctx.Globals().Set("IMG", IMG)
-	IMG.Set("Load", ctx.Function(DummyFunction))
-	IMG.Set("SaveFile", ctx.Function(DummyFunction))
+	IMG.Set("Load", ctx.Function(IMG_LoadDummy))
+	IMG.Set("SaveFile", ctx.Function(IMG_SaveFile))
 
+	// sound
+	mix.Init(mix.INIT_MP3 | mix.INIT_OGG)
+	if err := mix.OpenAudio(48000, mix.DEFAULT_FORMAT, 1, 4096); err != nil {
+		mix.Quit()
+		panic(err)
+	}
 	MIX := ctx.Object()
 	ctx.Globals().Set("MIX", MIX)
 	MIX.Set("LoadMUS", ctx.Function(DummyFunction))
@@ -554,7 +567,7 @@ func iniDummySDL(ctx *quickjs.Context) {
 	MIX.Set("PlayChannel", ctx.Function(DummyFunction))
 }
 
-func iniSDL(ctx *quickjs.Context) {
+func initSDL(ctx *quickjs.Context) {
 	SDL := ctx.Object()
 	ctx.Globals().Set("SDL", SDL)
 	SDL.Set("ApplyWindow", ctx.Function(SDL_ApplyWindow))
@@ -586,7 +599,6 @@ func iniSDL(ctx *quickjs.Context) {
 		mix.Quit()
 		panic(err)
 	}
-
 	MIX := ctx.Object()
 	ctx.Globals().Set("MIX", MIX)
 	MIX.Set("LoadMUS", ctx.Function(Mix_LoadMUS))
