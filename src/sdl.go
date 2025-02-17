@@ -45,7 +45,7 @@ func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 		gfx.ThickLineColor(SDL_Renderer, x1, y1, x2, y2, 2, color)
 	}
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -69,7 +69,7 @@ func SDL_Triangle(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 
 	SDL_Renderer.RenderGeometry(nil, v, nil)
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_FilledPolygonColor(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -94,7 +94,7 @@ func SDL_FilledPolygonColor(ctx *quickjs.Context, this quickjs.Value, args []qui
 	color := sdl.Color{R: uint8(args[3].Uint32()), G: uint8(args[4].Uint32()), B: uint8(args[5].Uint32()), A: 255}
 	gfx.FilledPolygonColor(SDL_Renderer, vx, vy, color)
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_FilledPolygonImage(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -185,7 +185,7 @@ func SDL_FillRect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	SDL_Renderer.SetRenderTarget(layer.texture)
 	SDL_Renderer.FillRect(&rect)
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_LayerClear(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -198,7 +198,7 @@ func SDL_LayerClear(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Val
 	SDL_Renderer.SetDrawColor(0, 0, 0, 0)
 	SDL_Renderer.Clear()
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_DrawSpriteToWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -314,7 +314,7 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 	}
 	ts.Free()
 
-	return ctx.String("")
+	return ctx.Null()
 }
 
 func SDL_QueryFontSize(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
@@ -524,38 +524,54 @@ func DummyFunction(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Valu
 func iniDummySDL(ctx *quickjs.Context) {
 	SDL := ctx.Object()
 	ctx.Globals().Set("SDL", SDL)
+	SDL.Set("ApplyWindow", ctx.Function(DummyFunction))
+	SDL.Set("Copy", ctx.Function(DummyFunction))
+	SDL.Set("CreateRGBSurface", ctx.Function(DummyFunction))
 	SDL.Set("CreateWindow", ctx.Function(DummyFunction))
-	SDL.Set("DrawSpriteToWindow", ctx.Function(DummyFunction))
+	SDL.Set("DrawImage", ctx.Function(DummyFunction))
 	SDL.Set("DrawLine", ctx.Function(DummyFunction))
-	SDL.Set("FillText", ctx.Function(DummyFunction))
+	SDL.Set("DrawSpriteToWindow", ctx.Function(DummyFunction))
+	SDL.Set("FilledPolygonColor", ctx.Function(DummyFunction))
+	SDL.Set("FilledPolygonImage", ctx.Function(DummyFunction))
 	SDL.Set("FillRect", ctx.Function(DummyFunction))
+	SDL.Set("FillText", ctx.Function(DummyFunction))
+	SDL.Set("LayerClear", ctx.Function(DummyFunction))
+	SDL.Set("QueryFontAspect", ctx.Function(DummyFunction))
+	SDL.Set("QueryFontSize", ctx.Function(DummyFunction))
 	SDL.Set("Triangle", ctx.Function(DummyFunction))
+
+	// image
+	img.Init(img.INIT_JPG | img.INIT_PNG)
+	IMG := ctx.Object()
+	ctx.Globals().Set("IMG", IMG)
+	IMG.Set("Load", ctx.Function(DummyFunction))
+	IMG.Set("SaveFile", ctx.Function(DummyFunction))
 
 	MIX := ctx.Object()
 	ctx.Globals().Set("MIX", MIX)
-	MIX.Set("LoadWAV", ctx.Function(DummyFunction))
 	MIX.Set("LoadMUS", ctx.Function(DummyFunction))
+	MIX.Set("LoadWAV", ctx.Function(DummyFunction))
 	MIX.Set("PlayChannel", ctx.Function(DummyFunction))
 }
 
 func iniSDL(ctx *quickjs.Context) {
 	SDL := ctx.Object()
 	ctx.Globals().Set("SDL", SDL)
-	SDL.Set("CreateWindow", ctx.Function(SDL_CreateWindow))
+	SDL.Set("ApplyWindow", ctx.Function(SDL_ApplyWindow))
+	SDL.Set("Copy", ctx.Function(SDL_Copy))
 	SDL.Set("CreateRGBSurface", ctx.Function(SDL_CreateRGBSurface))
-	SDL.Set("LayerClear", ctx.Function(SDL_LayerClear))
-	SDL.Set("DrawSpriteToWindow", ctx.Function(SDL_DrawSpriteToWindow))
+	SDL.Set("CreateWindow", ctx.Function(SDL_CreateWindow))
+	SDL.Set("DrawImage", ctx.Function(SDL_DrawImage))
 	SDL.Set("DrawLine", ctx.Function(SDL_DrawLine))
-	SDL.Set("FillText", ctx.Function(SDL_FillText))
-	SDL.Set("FillRect", ctx.Function(SDL_FillRect))
-	SDL.Set("Triangle", ctx.Function(SDL_Triangle))
+	SDL.Set("DrawSpriteToWindow", ctx.Function(SDL_DrawSpriteToWindow))
 	SDL.Set("FilledPolygonColor", ctx.Function(SDL_FilledPolygonColor))
 	SDL.Set("FilledPolygonImage", ctx.Function(SDL_FilledPolygonImage))
-	SDL.Set("DrawImage", ctx.Function(SDL_DrawImage))
-	SDL.Set("Copy", ctx.Function(SDL_Copy))
-	SDL.Set("ApplyWindow", ctx.Function(SDL_ApplyWindow))
-	SDL.Set("QueryFontSize", ctx.Function(SDL_QueryFontSize))
+	SDL.Set("FillRect", ctx.Function(SDL_FillRect))
+	SDL.Set("FillText", ctx.Function(SDL_FillText))
+	SDL.Set("LayerClear", ctx.Function(SDL_LayerClear))
 	SDL.Set("QueryFontAspect", ctx.Function(SDL_QueryFontAspect))
+	SDL.Set("QueryFontSize", ctx.Function(SDL_QueryFontSize))
+	SDL.Set("Triangle", ctx.Function(SDL_Triangle))
 
 	// image
 	img.Init(img.INIT_JPG | img.INIT_PNG)
@@ -573,8 +589,8 @@ func iniSDL(ctx *quickjs.Context) {
 
 	MIX := ctx.Object()
 	ctx.Globals().Set("MIX", MIX)
-	MIX.Set("LoadWAV", ctx.Function(MIX_LoadWAV))
 	MIX.Set("LoadMUS", ctx.Function(Mix_LoadMUS))
+	MIX.Set("LoadWAV", ctx.Function(MIX_LoadWAV))
 	MIX.Set("PlayChannel", ctx.Function(Mix_PlayChannel))
 	mix.HookMusicFinished(musicFinished)
 }

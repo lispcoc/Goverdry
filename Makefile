@@ -14,3 +14,6 @@ run: $(SRCS)
 
 build: $(SRCS)
 	go build -o $(OUTPUT) $(SRCS)
+
+fmt: $(SRCS)
+	go fmt $(SRCS)
