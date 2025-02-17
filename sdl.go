@@ -12,6 +12,8 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 )
 
+const FONT_SIZE = 12
+
 var SDL_Font *ttf.Font
 var SDL_Renderer *sdl.Renderer
 var SDL_Window *sdl.Window
@@ -21,8 +23,8 @@ var window_ok = false
 var WINDOW_X int32
 var WINDOW_Y int32
 var USE_SOFTWARE_RENDER = false
-
-const FONT_SIZE = 12
+var FONT_RENDER_SIZE = int32(14)
+var FONT_ASPECT = 0.5
 
 func SDL_DrawLine(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
 	if !window_ok {
@@ -156,7 +158,7 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	txt, _ := SDL_Renderer.CreateTextureFromSurface(surface)
 	_, _, w, h, _ := txt.Query()
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y - FONT_SIZE, W: w, H: h})
+	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y - FONT_RENDER_SIZE, W: w, H: h})
 
 	txt.Destroy()
 	surface.Free()
@@ -302,8 +304,25 @@ func SDL_CreateWindow(ctx *quickjs.Context, this quickjs.Value, args []quickjs.V
 		println(err.Error())
 		panic(err)
 	}
+	ts, err := SDL_Font.RenderUTF8Solid("a", sdl.Color{R: 0, G: 0, B: 0, A: 255})
+	if err != nil {
+		println(err.Error())
+		panic(err)
+	} else {
+		FONT_RENDER_SIZE = ts.H
+		FONT_ASPECT = float64(ts.W) / float64(ts.H)
+	}
+	ts.Free()
 
 	return ctx.String("")
+}
+
+func SDL_QueryFontSize(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	return ctx.Int32(FONT_RENDER_SIZE)
+}
+
+func SDL_QueryFontAspect(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value) quickjs.Value {
+	return ctx.Float64(FONT_ASPECT)
 }
 
 type Layer struct {
@@ -535,6 +554,8 @@ func iniSDL(ctx *quickjs.Context) {
 	SDL.Set("DrawImage", ctx.Function(SDL_DrawImage))
 	SDL.Set("Copy", ctx.Function(SDL_Copy))
 	SDL.Set("ApplyWindow", ctx.Function(SDL_ApplyWindow))
+	SDL.Set("QueryFontSize", ctx.Function(SDL_QueryFontSize))
+	SDL.Set("QueryFontAspect", ctx.Function(SDL_QueryFontAspect))
 
 	// image
 	img.Init(img.INIT_JPG | img.INIT_PNG)
