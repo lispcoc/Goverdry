@@ -208,19 +208,6 @@ func main() {
 	}
 	ctx.Loop()
 
-	files, _ = os.ReadDir("js_goverdry")
-	for _, f := range files {
-		if slices.Contains(pre_files, f.Name()) {
-			continue
-		}
-		println(f.Name())
-		_, err := ctx.EvalFile("js_goverdry/" + f.Name())
-		if err != nil {
-			panic(err)
-		}
-	}
-	ctx.Loop()
-
 	// read test data
 	ctx.EvalFile("test_data/gameDataHTML5.js")
 	ctx.EvalFile("test_data/defaultMessage_jpn.js")
@@ -235,6 +222,19 @@ func main() {
 	if err != nil {
 		println(err.Error())
 	}
+
+	files, _ = os.ReadDir("js_goverdry")
+	for _, f := range files {
+		if slices.Contains(pre_files, f.Name()) {
+			continue
+		}
+		println(f.Name())
+		_, err := ctx.EvalFile("js_goverdry/" + f.Name())
+		if err != nil {
+			panic(err)
+		}
+	}
+	ctx.Loop()
 
 	println("main loop")
 	running := true
@@ -272,7 +272,7 @@ func main() {
 			break
 		}
 		if ret.Bool() {
-			ctx.Eval("try { document.emit({ id: 'mousedown',  target: { id: 'game_window' }}) } catch (error) {console.log(error); console.log(error.stack)}")
+			ctx.Eval("try { window.emit({ id: 'mousedown',  target: { id: 'game_window' }}) } catch (error) {console.log(error); console.log(error.stack)}")
 		}
 
 		// update window
@@ -298,16 +298,17 @@ func main() {
 					running = false
 				} else if t.Type == sdl.KEYDOWN {
 					e := fmt.Sprintf("{ id: 'keydown',  which: %d}", remapKey(t.Keysym.Sym))
-					ctx.Eval("try { document.emit(" + e + ") } catch (error) {console.log(error); console.log(error.stack)}")
+					ctx.Eval("try { window.emit(" + e + ") } catch (error) {console.log(error); console.log(error.stack)}")
 				} else {
 					e := fmt.Sprintf("{ id: 'keyup',  which: %d}", remapKey(t.Keysym.Sym))
-					ctx.Eval("try { document.emit(" + e + ") } catch (error) {console.log(error); console.log(error.stack)}")
+					ctx.Eval("try { window.emit(" + e + ") } catch (error) {console.log(error); console.log(error.stack)}")
 				}
 			case sdl.QuitEvent:
 				println("Quit")
 				running = false
 			}
 		}
+		ctx.Loop()
 
 		// fps limitter
 		for time.Since(frametime).Milliseconds() < 33 {

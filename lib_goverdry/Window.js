@@ -9,6 +9,7 @@ class Window {
   }
   emit (event) {
     console.log(this.constructor.name, 'emit', event)
+    document.emit(event)
     for (const e of this.events) {
       if (event.id == e.id) {
         e.listener(event)
@@ -17,6 +18,16 @@ class Window {
   }
   focus () {
     console.log(this.constructor.name, 'focus')
+    this.unfocusOther (this)
+  }
+  unfocus () {}
+  unfocusOther (o) {
+    if (o != this) {
+      this.unfocus ()
+    }
+    if (document) {
+      document.unfocusOther(this)
+    }
   }
   set onload (f) {
     this._onload = f

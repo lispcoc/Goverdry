@@ -49,6 +49,7 @@ class SurfaceContext {
     this.points = []
     this.lines = []
     this.image_data = new ImageData()
+    this.textBaseline = 'alphabetic'
   }
   getImageData (sx, sy, sw, sh, settings = {}) {
     console.log(this.constructor.name, 'getImageData', sx, sy, sw, sh)
@@ -155,7 +156,14 @@ class SurfaceContext {
   }
   fillText (Text, x, y) {
     var color = toRGB(this.fillStyle)
-    SDL.FillText(this.handle, Text, x, y, color.r, color.g, color.b)
+    var y_offset = MP.FONT_SIZE
+    if (this.textBaseline == 'middle') {
+      y_offset = MP.FONT_SIZE / 2
+    }
+    if (this.textBaseline == 'top') {
+      y_offset = 0
+    }
+    SDL.FillText(this.handle, Text, x, y - y_offset, color.r, color.g, color.b)
   }
   drawImage (img, x, y, w = 0, h = 0) {
     SDL.DrawImage(

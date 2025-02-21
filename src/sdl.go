@@ -158,7 +158,7 @@ func SDL_FillText(ctx *quickjs.Context, this quickjs.Value, args []quickjs.Value
 	txt, _ := SDL_Renderer.CreateTextureFromSurface(surface)
 	_, _, w, h, _ := txt.Query()
 	SDL_Renderer.SetRenderTarget(layer.texture)
-	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y - FONT_RENDER_SIZE, W: w, H: h})
+	SDL_Renderer.Copy(txt, &sdl.Rect{X: 0, Y: 0, W: w, H: h}, &sdl.Rect{X: x, Y: y, W: w, H: h})
 
 	txt.Destroy()
 	surface.Free()

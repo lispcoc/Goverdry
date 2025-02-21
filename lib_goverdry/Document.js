@@ -1,13 +1,53 @@
-class Document {
+class DocumentElement {
   constructor () {
     console.log(this.constructor.name, 'constructor')
-    this.location = {}
-    this.hostname = 'fake'
+    this.style = {}
     this.events = []
+    this.children = []
+  }
+  setAttribute (a, b) {
+    console.log(this.constructor.name, 'setAttribute', a, b)
   }
   addEventListener (id, listener) {
     console.log(this.constructor.name, 'addEventListener', id, listener.name)
     this.events.push({ id: id, listener: listener })
+  }
+  removeEventListener (id, listener) {
+    console.log(this.constructor.name, 'removeEventListener', id, listener.name)
+    this.events = this.events.filter(e => {
+      return e.listener != listener
+    })
+  }
+  emit (event) {
+    for (const c of this.children) {
+      c.emit(event)
+    }
+    for (const e of this.events) {
+      if (event.id == e.id) {
+        e.listener(event)
+      }
+    }
+  }
+  focus () {
+    this.unfocusOther(this)
+  }
+  unfocus () {}
+  unfocusOther (o) {
+    if (o != this) {
+      this.unfocus()
+    }
+    for (const c of this.children) {
+      c.unfocusOther(this)
+    }
+  }
+}
+
+class Document extends DocumentElement {
+  constructor () {
+    super()
+    console.log(this.constructor.name, 'constructor')
+    this.location = {}
+    this.hostname = 'fake'
   }
   getElementById (id) {
     console.log(this.constructor.name, 'getElementById', id)
@@ -31,39 +71,23 @@ class Document {
     }
     return { innerHTML: ':' }
   }
-  createElement () {
+  createElement (type) {
     console.log(this.constructor.name, 'createElement')
-    return new DocumentElement()
-  }
-  emit (event) {
-    for (const e of this.events) {
-      if (event.id == e.id) {
-        e.listener(event)
-      }
+    var c
+    if (type == 'input') {
+      c = new Input()
+    } else {
+      c = new DocumentElement()
     }
+    this.children.push(c)
+    return c
   }
 }
 
-class DocumentElement {
-  constructor () {
-    console.log(this.constructor.name, 'constructor')
-    this.style = {}
-    this.events = []
-  }
-  setAttribute (a, b) {
-    console.log(this.constructor.name, 'setAttribute', a, b)
-  }
-  addEventListener (id, listener) {
-    console.log(this.constructor.name, 'addEventListener', id, listener.name)
-    this.events.push({ id: id, listener: listener })
-  }
-  emit (event) {
-    for (const e of this.events) {
-      if (event.id == e.id) {
-        e.listener(event)
-      }
-    }
-  }
+try {
+  var document = new Document()
+} catch (e) {
+  console.log(e)
+  console.log(e.stack)
+  throw e
 }
-
-var document = new Document()
