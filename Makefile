@@ -13,4 +13,4 @@ run: $(SRCS)
 	go run $(SRCS)
 
 build: $(SRCS)
-	go build -o $(OUTPUT) $(SRCS)
+	go build  --ldflags '-extldflags "-Wl,--allow-multiple-definition"' -o $(OUTPUT) $(SRCS)
